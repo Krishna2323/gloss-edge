@@ -1,46 +1,78 @@
-import { auth } from "@/auth";
+// import { auth } from "@/auth";
 import LocalSearch from "@/components/search/LocalSearch";
 import HomeFilter from "@/components/filters/HomeFilter";
-import QuestionCard from "@/components/cards/QuestionCard";
+import ProductCard from "@/components/cards/ProductCard";
 
-const questions = [
-  {
-    _id: "1",
-    title: "How to learn React?",
-    description: "I want to learn React, can anyone help me?",
-    tags: [
-      { _id: "1", name: "React" },
-      { _id: "2", name: "JavaScript" },
-    ],
-    author: {
-      _id: "1",
-      name: "John Doe",
-      image:
-        "https://static.vecteezy.com/system/resources/previews/002/002/403/non_2x/man-with-beard-avatar-character-isolated-icon-free-vector.jpg",
-    },
-    upvotes: 10,
-    answers: 5,
-    views: 100,
-    createdAt: new Date(),
-  },
+const products = [
   {
     _id: "2",
-    title: "How to learn JavaScript?",
-    description: "I want to learn JavaScript, can anyone help me?",
-    tags: [
-      { _id: "1", name: "JavaScript" },
-      { _id: "2", name: "JavaScript" },
+    brand: "LuxePanel",
+    title: "Glossy White Self Adhesive Acrylic",
+    description:
+      "High-quality glossy white acrylic sheet with strong adhesive backing.",
+    category: [
+      { _id: "1", name: "Acrylic" },
+      { _id: "3", name: "Interior Design" },
     ],
-    author: {
-      _id: "1",
-      name: "John Doe",
-      image:
-        "https://static.vecteezy.com/system/resources/previews/002/002/403/non_2x/man-with-beard-avatar-character-isolated-icon-free-vector.jpg",
-    },
-    upvotes: 10,
-    answers: 5,
-    views: 100,
-    createdAt: new Date("2021-09-01"),
+    createdAt: new Date("2022-05-15"),
+    model: "LP-101",
+    quantity: 15,
+  },
+  {
+    _id: "3",
+    brand: "Reflecto",
+    title: "Mirror Finish Acrylic Sheet",
+    description:
+      "Premium mirror-finish acrylic sheet, perfect for decor and furniture applications.",
+    category: [
+      { _id: "1", name: "Acrylic" },
+      { _id: "2", name: "Furniture Decor" },
+      { _id: "4", name: "Wall Panels" },
+    ],
+    createdAt: new Date("2023-02-10"),
+    model: "RF-502",
+    quantity: 10,
+  },
+  {
+    _id: "4",
+    brand: "GlossEdge",
+    title: "Frosted Blue Acrylic Sheet",
+    description: "Elegant frosted blue acrylic for a modern look.",
+    category: [
+      { _id: "1", name: "Acrylic" },
+      { _id: "5", name: "Kitchen Decor" },
+    ],
+    createdAt: new Date("2023-08-21"),
+    model: "GE-305",
+    quantity: 30,
+  },
+  {
+    _id: "5",
+    brand: "DecoPanel",
+    title: "Textured Black Acrylic Panel",
+    description:
+      "Scratch-resistant, textured black acrylic panel suitable for furniture and interiors.",
+    category: [
+      { _id: "1", name: "Acrylic" },
+      { _id: "2", name: "Furniture Decor" },
+      { _id: "6", name: "Commercial Interiors" },
+    ],
+    createdAt: new Date("2024-01-05"),
+    model: "DP-707",
+    quantity: 18,
+  },
+  {
+    _id: "6",
+    brand: "Acrylux",
+    title: "Transparent Acrylic Sheet",
+    description: "Crystal-clear acrylic sheet for various applications.",
+    category: [
+      { _id: "1", name: "Acrylic" },
+      { _id: "7", name: "Signage" },
+    ],
+    createdAt: new Date("2024-02-18"),
+    model: "AX-900",
+    quantity: 25,
   },
 ];
 
@@ -50,14 +82,17 @@ interface SearchParams {
 
 const Home = async ({ searchParams }: SearchParams) => {
   const { query = "", filter = "" } = await searchParams;
-  const session = await auth();
+  // const session = await auth();
 
-  const filteredQuestions = questions.filter((question) => {
-    const matchesQuery = question.title
-      .toLowerCase()
-      .includes(query.toLowerCase());
+  const filteredQuestions = products.filter((product) => {
+    const matchesQuery =
+      product.title.toLowerCase().includes(query.toLowerCase()) ||
+      product.model.toLowerCase().includes(query.toLowerCase());
     const matchesFilter = filter
-      ? question.tags[0].name.toLowerCase() === filter.toLowerCase()
+      ? // ? question.category[0].name.toLowerCase() === filter.toLowerCase()
+        product.category.some(
+          (c) => c.name.toLowerCase() === filter.toLowerCase()
+        )
       : true;
     return matchesQuery && matchesFilter;
   });
@@ -65,20 +100,20 @@ const Home = async ({ searchParams }: SearchParams) => {
   return (
     <>
       <section className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">
-        <h1 className="h1-bold text-dark100_light900">All Questions</h1>
+        <h1 className="h1-bold text-dark100_light900">All Products</h1>
       </section>
       <section className="mt-11">
         <LocalSearch
           route="/"
           imgSrc="/icons/search.svg"
-          placeholder="Search questions..."
+          placeholder="Search products..."
           otherClasses="flex-1"
         />
       </section>
       <HomeFilter />
       <div className="mt-10 flex w-full flex-col gap-6">
         {filteredQuestions.map((question) => (
-          <QuestionCard key={question._id} question={question} />
+          <ProductCard key={question._id} question={question} />
         ))}
       </div>{" "}
     </>

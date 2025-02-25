@@ -27,17 +27,19 @@ const Metric = ({
     <>
       <Image
         src={imgUrl}
-        width={16}
-        height={16}
+        width={18}
+        height={18}
         alt={alt}
-        className={`rounded-full object-contain ${imgStyles}`}
+        className={`object-contain ${imgStyles}`}
       />
 
-      <p className={`${textStyles} flex items-center gap-1`}>
+      <p
+        className={`${textStyles} flex items-center gap-1 text-sm font-semibold`}
+      >
         {value}
 
         <span
-          className={`small-regular line-clamp-1 ${isAuthor ? "max-sm:hidden" : ""}`}
+          className={`line-clamp-1 text-sm ${isAuthor ? "max-sm:hidden" : ""}`}
         >
           {title}
         </span>

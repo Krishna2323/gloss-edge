@@ -1,4 +1,4 @@
-interface Tag {
+interface Category {
   _id: string;
   name: string;
 }
@@ -9,14 +9,18 @@ interface Author {
   image: string;
 }
 
-interface Question {
+interface Product {
   _id: string;
+  brand: string;
   title: string;
-  tags: Tag[];
-  author: Author;
-  cretedAt: Date;
-  upvotes: number;
-  answers: number;
-  views: number;
+  description: string;
+  quantity: number;
+  category: Category[];
   createdAt: Date;
+  model: string;
+  // tags: Tag[];
+  // author: Author;
+  // upvotes: number;
+  // answers: number;
+  // views: number;
 }
