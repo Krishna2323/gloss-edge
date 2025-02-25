@@ -17,7 +17,7 @@ const AuthLayout = ({ children }: { children: ReactNode }) => {
             </p>
           </div>
           <Image
-            src="/images/Glossedge-Logo.png"
+            src="/images/site-logo.png"
             alt="DevFlow Logo"
             width={72}
             height={72}

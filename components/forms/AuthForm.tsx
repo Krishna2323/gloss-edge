@@ -11,7 +11,7 @@ import {
 } from "react-hook-form";
 import { z, ZodType } from "zod";
 
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
