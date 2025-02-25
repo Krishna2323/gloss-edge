@@ -10,8 +10,6 @@ import {
   useForm,
 } from "react-hook-form";
 import { z, ZodType } from "zod";
-
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -22,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ROUTES from "@/constants/routes";
+import { Button } from "../ui/button";
 
 interface AuthFormProps<T extends FieldValues> {
   schema: ZodType<T>;
