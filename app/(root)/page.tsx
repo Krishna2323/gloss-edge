@@ -1,9 +1,7 @@
-// import { auth } from "@/auth";
+import { auth } from "@/auth";
 import LocalSearch from "@/components/search/LocalSearch";
 import HomeFilter from "@/components/filters/HomeFilter";
 import ProductCard from "@/components/cards/ProductCard";
-import handleError from "@/lib/handlers/error";
-import { api } from "@/lib/api";
 
 const products = [
   {
@@ -78,24 +76,16 @@ const products = [
   },
 ];
 
-const test = async () => {
-  try {
-    return await api.users.getAll();
-  } catch (error) {
-    return handleError(error);
-  }
-};
-
 interface SearchParams {
   searchParams: Promise<{ [key: string]: string }>;
 }
 
 const Home = async ({ searchParams }: SearchParams) => {
-  const users = await test();
+  const session = await auth();
 
-  console.log(users);
+  console.log("Session: ", session);
+
   const { query = "", filter = "" } = await searchParams;
-  // const session = await auth();
 
   const filteredQuestions = products.filter((product) => {
     const matchesQuery =
