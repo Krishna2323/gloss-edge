@@ -7,8 +7,6 @@ export interface IUser {
   //   bio?: string;
   image?: string;
   address?: string;
-  portfolio?: string;
-  reputation?: number;
   contactNumber?: number;
 }
 
@@ -21,8 +19,6 @@ const UserSchema = new Schema<IUser>(
     // bio: { type: String },
     image: { type: String },
     address: { type: String },
-    portfolio: { type: String },
-    reputation: { type: Number, default: 0 },
     contactNumber: {
       type: Number,
       validate: {
