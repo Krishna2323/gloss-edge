@@ -14,13 +14,8 @@ interface Product {
   brand: string;
   title: string;
   description: string;
-  quantity: number;
-  category: Category[];
+  categories: Category[];
   createdAt: Date;
-  model: string;
-  // tags: Tag[];
-  // author: Author;
-  // upvotes: number;
-  // answers: number;
-  // views: number;
+  stock: string;
+  code: string;
 }
