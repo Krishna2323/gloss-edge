@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-
 import User from "@/database/models/user.model";
 import handleError from "@/lib/handlers/error";
 import { NotFoundError } from "@/lib/http-errors";
