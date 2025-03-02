@@ -14,13 +14,13 @@ interface Props {
 const ProductCard = ({
   question: {
     _id,
-    category,
+    categories,
     // createdAt,
     brand,
     description,
     title,
-    quantity,
-    model,
+    stock,
+    code,
     // quantity,
     // title,
     // author,
@@ -46,7 +46,7 @@ const ProductCard = ({
       </div>
 
       <div className="mt-3.5 flex w-full flex-wrap gap-2">
-        {category.map((category) => (
+        {categories.map((category) => (
           <TagCard
             key={category._id}
             _id={category._id}
@@ -71,15 +71,15 @@ const ProductCard = ({
           <Metric
             imgUrl="/icons/stack.svg"
             alt="quantity"
-            value={quantity}
-            title=" Quantity"
+            value={stock}
+            title=" Stock"
             textStyles="text-dark400_light800"
           />
           <Metric
             imgUrl="/icons/hashtag.svg"
-            alt="modal"
-            value={model}
-            title=" Model"
+            alt="Code"
+            value={code}
+            title=" Code"
             textStyles="text-dark400_light800"
           />
           {/* <Metric

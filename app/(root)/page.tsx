@@ -2,6 +2,8 @@
 import LocalSearch from "@/components/search/LocalSearch";
 import HomeFilter from "@/components/filters/HomeFilter";
 import ProductCard from "@/components/cards/ProductCard";
+import handleError from "@/lib/handlers/error";
+import { ValidationError } from "@/lib/http-errors";
 
 const products = [
   {
@@ -10,13 +12,13 @@ const products = [
     title: "Glossy White Self Adhesive Acrylic",
     description:
       "High-quality glossy white acrylic sheet with strong adhesive backing.",
-    category: [
+    categories: [
       { _id: "1", name: "Acrylic" },
       { _id: "3", name: "Interior Design" },
     ],
     createdAt: new Date("2022-05-15"),
-    model: "LP-101",
-    quantity: 15,
+    code: "LP-101",
+    stock: 15,
   },
   {
     _id: "3",
@@ -24,27 +26,27 @@ const products = [
     title: "Mirror Finish Acrylic Sheet",
     description:
       "Premium mirror-finish acrylic sheet, perfect for decor and furniture applications.",
-    category: [
+    categories: [
       { _id: "1", name: "Acrylic" },
       { _id: "2", name: "Furniture Decor" },
       { _id: "4", name: "Wall Panels" },
     ],
     createdAt: new Date("2023-02-10"),
-    model: "RF-502",
-    quantity: 10,
+    code: "RF-502",
+    stock: 10,
   },
   {
     _id: "4",
     brand: "GlossEdge",
     title: "Frosted Blue Acrylic Sheet",
     description: "Elegant frosted blue acrylic for a modern look.",
-    category: [
+    categories: [
       { _id: "1", name: "Acrylic" },
       { _id: "5", name: "Kitchen Decor" },
     ],
     createdAt: new Date("2023-08-21"),
-    model: "GE-305",
-    quantity: 30,
+    code: "GE-305",
+    stock: 30,
   },
   {
     _id: "5",
@@ -52,45 +54,58 @@ const products = [
     title: "Textured Black Acrylic Panel",
     description:
       "Scratch-resistant, textured black acrylic panel suitable for furniture and interiors.",
-    category: [
+    categories: [
       { _id: "1", name: "Acrylic" },
       { _id: "2", name: "Furniture Decor" },
       { _id: "6", name: "Commercial Interiors" },
     ],
     createdAt: new Date("2024-01-05"),
-    model: "DP-707",
-    quantity: 18,
+    code: "DP-707",
+    stock: 18,
   },
   {
     _id: "6",
     brand: "Acrylux",
     title: "Transparent Acrylic Sheet",
     description: "Crystal-clear acrylic sheet for various applications.",
-    category: [
+    categories: [
       { _id: "1", name: "Acrylic" },
       { _id: "7", name: "Signage" },
     ],
     createdAt: new Date("2024-02-18"),
-    model: "AX-900",
-    quantity: 25,
+    code: "AX-900",
+    stock: 25,
   },
 ];
+
+const test = async () => {
+  try {
+    throw new ValidationError({
+      title: ["Required"],
+      tags: ['"JavaScript" is not a valid tag.'],
+    });
+  } catch (error) {
+    return handleError(error);
+  }
+};
 
 interface SearchParams {
   searchParams: Promise<{ [key: string]: string }>;
 }
 
 const Home = async ({ searchParams }: SearchParams) => {
+  await test();
+
   const { query = "", filter = "" } = await searchParams;
   // const session = await auth();
 
   const filteredQuestions = products.filter((product) => {
     const matchesQuery =
       product.title.toLowerCase().includes(query.toLowerCase()) ||
-      product.model.toLowerCase().includes(query.toLowerCase());
+      product.code.toLowerCase().includes(query.toLowerCase());
     const matchesFilter = filter
       ? // ? question.category[0].name.toLowerCase() === filter.toLowerCase()
-        product.category.some(
+        product.categories.some(
           (c) => c.name.toLowerCase() === filter.toLowerCase()
         )
       : true;

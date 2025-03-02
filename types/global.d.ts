@@ -16,6 +16,6 @@ interface Product {
   description: string;
   categories: Category[];
   createdAt: Date;
-  stock: string;
+  stock: number;
   code: string;
 }
