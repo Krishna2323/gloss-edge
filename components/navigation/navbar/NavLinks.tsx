@@ -1,22 +1,33 @@
 "use client";
 
 import { SheetClose } from "@/components/ui/sheet";
-import { sidebarLinks } from "@/constants";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 
-const NavLinks = ({ isMobileNav = false }: { isMobileNav?: boolean }) => {
+type LinkType = {
+  imgURL: string;
+  route: string;
+  label: string;
+};
+
+const NavLinks = ({
+  isMobileNav = false,
+  links = [],
+}: {
+  isMobileNav?: boolean;
+  links: LinkType[];
+}) => {
   const pathname = usePathname();
   const userId = 1;
 
   return (
     <>
-      {sidebarLinks.map((item) => {
+      {links.map((item) => {
         const isActive =
-          (pathname.includes(item.route) && item.route.length > 1) ||
+          // (pathname.includes(item.route) && item.route.length > 1) ||
           pathname === item.route;
 
         if (item.route === "/profile") {
