@@ -20,7 +20,7 @@ const AdminLeftSidebar = () => {
         >
           <Button
             type="submit"
-            className="small-medium light-border-2 btn-tertiary text-dark400_light900 min-h-[41px] w-full rounded-lg border px-4 py-3 shadow-none"
+            className="small-medium btn-secondary min-h-[41px] w-full rounded-lg px-4 py-3 shadow-none"
           >
             <Image
               src="/icons/sign-up.svg"
@@ -29,7 +29,9 @@ const AdminLeftSidebar = () => {
               height={28}
               className="invert-colors lg:hidden"
             />
-            <span className="max-lg:hidden">Sign Out</span>
+            <span className="primary-text-gradient max-lg:hidden">
+              Sign Out
+            </span>
           </Button>
         </form>
       </div>
