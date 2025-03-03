@@ -1,0 +1,204 @@
+"use client";
+
+import React, { useTransition } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  Form,
+  FormControl,
+  FormDescription,
+} from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { ProductSchema } from "@/lib/validations";
+import CategoryCard from "@/components/cards/CategoryCard";
+import { z } from "zod";
+import { createProduct } from "@/lib/actions/product.actions";
+import { useToast } from "@/hooks/useToast";
+import { ReloadIcon } from "@radix-ui/react-icons";
+
+const AddProductForm = () => {
+  const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
+  const defaultValues = {
+    brand: "",
+    categories: [],
+    code: "",
+    description: "",
+    stock: 0,
+    title: "",
+  };
+  const form = useForm({
+    resolver: zodResolver(ProductSchema),
+    defaultValues,
+  });
+
+  const handleInputKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    field: { value: string[] }
+  ) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const categoryInput = e.currentTarget.value.trim();
+
+      if (
+        categoryInput &&
+        categoryInput.length < 15 &&
+        !field.value.includes(categoryInput)
+      ) {
+        form.setValue("categories", [...field.value, categoryInput]);
+        e.currentTarget.value = "";
+        form.clearErrors("categories");
+      } else if (categoryInput.length > 15) {
+        form.setError("categories", {
+          type: "manual",
+          message: "Category should be less than 15 characters",
+        });
+      } else if (field.value.includes(categoryInput)) {
+        form.setError("categories", {
+          type: "manual",
+          message: "Category already exists",
+        });
+      }
+    }
+  };
+
+  const handleCategoryRemove = (
+    category: string,
+    field: { value: string[] }
+  ) => {
+    const newCategories = field.value.filter((t) => t !== category);
+    form.setValue("categories", newCategories);
+
+    if (newCategories.length === 0) {
+      form.setError("categories", {
+        type: "manual",
+        message: "Categories are required",
+      });
+    }
+  };
+
+  const handleCreateProduct = async (data: z.infer<typeof ProductSchema>) => {
+    startTransition(async () => {
+      const result = await createProduct(data);
+
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Product created successfully",
+        });
+        form.reset();
+      } else {
+        toast({
+          type: "error",
+          title: `Error ${result.status}`,
+          description: result.error?.message || "Something went wrong",
+        });
+      }
+    });
+  };
+
+  return (
+    // <div className="p-6 border rounded-lg shadow-md">
+    //   <h2 className="h2-semibold text-dark100_light900 mb-4">
+    //     Add Product
+    //   </h2>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(handleCreateProduct)}
+        className="space-y-6"
+      >
+        {(Object.keys(defaultValues) as Array<keyof typeof defaultValues>).map(
+          (field) => {
+            if (field === "categories") {
+              return null;
+            }
+            return (
+              <FormField
+                key={field}
+                control={form.control}
+                name={field}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2.5">
+                    <FormLabel>
+                      {field.name.charAt(0).toUpperCase() + field.name.slice(1)}
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        required
+                        type={field.name === "stock" ? "number" : "text"}
+                        {...field}
+                        {...(field.name === "stock"
+                          ? {
+                              onChange: (e) =>
+                                field.onChange(Number(e.target.value)),
+                            }
+                          : {})}
+                        className="rounded border p-2"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            );
+          }
+        )}
+        <FormField
+          control={form.control}
+          name="categories"
+          render={({ field }) => (
+            <FormItem className="flex flex-col gap-3">
+              <FormLabel>Categories</FormLabel>
+              <FormControl>
+                <div>
+                  <Input
+                    placeholder="Add categories..."
+                    onKeyDown={(e) => handleInputKeyDown(e, field)}
+                  />
+                  {field.value.length > 0 && (
+                    <div className="mt-2.5 flex flex-wrap gap-2.5">
+                      {field?.value?.map((category: string) => (
+                        <CategoryCard
+                          key={category}
+                          _id={category}
+                          name={category}
+                          compact
+                          remove
+                          isButton
+                          handleRemove={() =>
+                            handleCategoryRemove(category, field)
+                          }
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </FormControl>
+              <FormDescription>
+                Add up to 3 categories. Press enter to add a category.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button disabled={form.formState.isSubmitting ?? isPending}>
+          {isPending ? (
+            <>
+              <ReloadIcon className="mr-2 animate-spin" /> Creating...
+            </>
+          ) : (
+            "Confirm"
+          )}
+        </Button>
+      </form>
+    </Form>
+    // </div>
+  );
+};
+
+export default AddProductForm;

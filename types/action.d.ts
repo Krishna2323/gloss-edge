@@ -16,3 +16,12 @@ interface AuthCredentials {
   email: string;
   password: string;
 }
+
+interface CreateProductParams {
+  brand: string;
+  title: string;
+  description: string;
+  stock: number;
+  categories: string[];
+  code: string;
+}

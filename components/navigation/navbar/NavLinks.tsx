@@ -51,10 +51,7 @@ const NavLinks = ({
               alt={item.label}
               width={24}
               height={24}
-              // className={cn(
-              //   // { "invert-colors": !isActive },
-              //   "fill-white fill-slate-200"
-              // )}
+              className={cn({ "invert-colors": !isActive }, "fill-white")}
             />
             <p
               className={cn(

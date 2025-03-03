@@ -1,8 +1,16 @@
 import { ReactNode } from "react";
 import Navbar from "@/components/navigation/navbar";
 import AdminLeftSidebar from "@/components/navigation/AdminLeftSidebar";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
-const RootLayout = ({ children }: { children: ReactNode }) => {
+const RootLayout = async ({ children }: { children: ReactNode }) => {
+  const session = await auth();
+
+  if (session?.user.role !== "admin") {
+    redirect("/");
+  }
+
   return (
     <main className="background-light850_dark100 relative">
       <Navbar />

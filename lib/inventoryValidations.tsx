@@ -16,7 +16,7 @@ export const AddProductSchema = z.object({
     .min(6, { message: "Code must be at least 2 characters long. " })
     .max(100, { message: "Code cannot exceed 100 characters." }),
 
-  category: z
+  categories: z
     .string()
     .min(6, { message: "Title must be at least 6 characters long. " })
     .max(100, { message: "Title cannot exceed 100 characters." }),

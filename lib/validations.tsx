@@ -105,3 +105,30 @@ export const SignInWithOAuthSchema = z.object({
     image: z.string().url("Invalid image URL").optional(),
   }),
 });
+
+export const ProductSchema = z.object({
+  title: z
+    .string()
+    .min(5, { message: "Title is required." })
+    .max(100, { message: "Title cannot exceed 100 characters." }),
+  brand: z
+    .string()
+    .min(5, { message: "Title is required." })
+    .max(100, { message: "Title cannot exceed 100 characters." }),
+  description: z.string().min(1, { message: "Body is required." }),
+  categories: z
+    .array(
+      z
+        .string()
+        .min(1, { message: "Tag is required." })
+        .max(30, { message: "Tag cannot exceed 30 characters." })
+    )
+    .min(1, { message: "At least one tag is required." })
+    .max(3, { message: "Cannot add more than 3 tags." }),
+
+  stock: z.number().min(1, { message: "Please enter stock." }),
+  code: z
+    .string()
+    .min(1, { message: "Code is required." })
+    .max(100, { message: "Code cannot exceed 100 characters." }),
+});

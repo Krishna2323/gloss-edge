@@ -2,14 +2,14 @@ import { Schema, models, model, Document } from "mongoose";
 
 export interface ICategory {
   name: string;
-  //   products: number;
+  products: number;
 }
 
 export interface ICategoryDoc extends ICategory, Document {}
 const CategorySchema = new Schema<ICategory>(
   {
     name: { type: String, required: true, unique: true },
-    // products: { type: Number, default: 0 },
+    products: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

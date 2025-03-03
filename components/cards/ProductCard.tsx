@@ -4,7 +4,7 @@ import React from "react";
 import ROUTES from "@/constants/routes";
 // import { getTimeStamp } from "@/lib/utils";
 
-import TagCard from "./TagCard";
+import TagCard from "./CategoryCard";
 import Metric from "../Metric";
 
 interface Props {
@@ -37,7 +37,7 @@ const ProductCard = ({
             {getTimeStamp(createdAt)}
           </span> */}
 
-          <Link href={ROUTES.QUESTION(_id)}>
+          <Link href={ROUTES.PRODUCT(_id)}>
             <h3 className="sm:h3-semibold base-semibold text-dark200_light900 line-clamp-1 flex-1">
               {title} - {brand}
             </h3>
@@ -74,6 +74,7 @@ const ProductCard = ({
             value={stock}
             title=" Stock"
             textStyles="text-dark400_light800"
+            imgStyles="invert-colors"
           />
           <Metric
             imgUrl="/icons/hashtag.svg"
@@ -81,6 +82,7 @@ const ProductCard = ({
             value={code}
             title=" Code"
             textStyles="text-dark400_light800"
+            imgStyles="invert-colors"
           />
           {/* <Metric
             imgUrl="/icons/eye.svg"
