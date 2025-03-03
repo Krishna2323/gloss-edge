@@ -17,39 +17,31 @@ import { Input } from "@/components/ui/input";
 import { ProductSchema } from "@/lib/validations";
 import CategoryCard from "@/components/cards/CategoryCard";
 import { z } from "zod";
-import { createProduct } from "@/lib/actions/product.actions";
+import { createProduct, editProduct } from "@/lib/actions/product.actions";
 import { useToast } from "@/hooks/useToast";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { redirect } from "next/navigation";
 
 interface Props {
-  productID?: string;
+  product?: Product;
   isEditAction?: boolean;
-  defaultValues?: {
-    brand: string;
-    categories: never[];
-    code: string;
-    description: string;
-    stock: number;
-    title: string;
-  };
 }
-const AddEditProductDialog = ({
-  defaultValues = {
-    brand: "",
-    categories: [],
-    code: "",
-    description: "",
-    stock: 0,
-    title: "",
-  },
-}: Props) => {
+const AddEditProductDialog = ({ isEditAction, product }: Props) => {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
 
   const form = useForm({
     resolver: zodResolver(ProductSchema),
-    defaultValues,
+    defaultValues: {
+      title: product?.title ?? "",
+      brand: product?.brand ?? "",
+      code: product?.code ?? "",
+      stock: Number(product?.stock ?? 0) ?? 0,
+      description: product?.description ?? "",
+      categories: product?.categories
+        ? product?.categories.map((e) => e.name)
+        : [],
+    },
   });
 
   const handleInputKeyDown = (
@@ -100,6 +92,26 @@ const AddEditProductDialog = ({
 
   const handleCreateProduct = async (data: z.infer<typeof ProductSchema>) => {
     startTransition(async () => {
+      if (isEditAction && product?._id) {
+        const result = await editProduct({ productID: product._id, ...data });
+
+        if (result.success) {
+          toast({
+            title: "Success",
+            description: "Product updated successfully",
+          });
+
+          if (result.data) redirect("/admin/products");
+        } else {
+          toast({
+            type: "error",
+            title: `Error ${result.status}`,
+            description: result.error?.message || "Something went wrong",
+          });
+        }
+        return;
+      }
+
       const result = await createProduct(data);
 
       if (result.success) {
@@ -108,7 +120,7 @@ const AddEditProductDialog = ({
           description: "Product created successfully",
         });
 
-        if (result.data) redirect("/admin/products");
+        if (result.data) redirect(`/admin/products/${result.data._id}`);
       } else {
         toast({
           type: "error",
@@ -121,46 +133,53 @@ const AddEditProductDialog = ({
 
   return (
     <Form {...form}>
+      {/* <div className="shadow-md"> */}
+      <h2 className="h2-semibold text-dark100_light900 mb-6">
+        {isEditAction ? "Edit" : "Add"} Product
+      </h2>
+      {/* </div> */}
       <form
         onSubmit={form.handleSubmit(handleCreateProduct)}
         className="space-y-6"
       >
-        {(Object.keys(defaultValues) as Array<keyof typeof defaultValues>).map(
-          (field) => {
-            if (field === "categories") {
-              return null;
-            }
-            return (
-              <FormField
-                key={field}
-                control={form.control}
-                name={field}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col gap-2.5">
-                    <FormLabel className="paragraph-medium text-dark400_light700">
-                      {field.name.charAt(0).toUpperCase() + field.name.slice(1)}
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        required
-                        type={field.name === "stock" ? "number" : "text"}
-                        {...field}
-                        {...(field.name === "stock"
-                          ? {
-                              onChange: (e) =>
-                                field.onChange(Number(e.target.value)),
-                            }
-                          : {})}
-                        className="paragraph-regular background-light900_dark300 light-border-2 text-dark300_light700 no-focus min-h-12 rounded-1.5 border"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            );
+        {(
+          Object.keys(form.formState.defaultValues ?? {}) as Array<
+            keyof z.infer<typeof ProductSchema>
+          >
+        ).map((field) => {
+          if (field === "categories") {
+            return null;
           }
-        )}
+          return (
+            <FormField
+              key={field}
+              control={form.control}
+              name={field}
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-2.5">
+                  <FormLabel className="paragraph-medium text-dark400_light700">
+                    {field.name.charAt(0).toUpperCase() + field.name.slice(1)}
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      required
+                      type={field.name === "stock" ? "number" : "text"}
+                      {...field}
+                      {...(field.name === "stock"
+                        ? {
+                            onChange: (e) =>
+                              field.onChange(Number(e.target.value)),
+                          }
+                        : {})}
+                      className="paragraph-regular background-light900_dark300 light-border-2 text-dark300_light700 no-focus min-h-12 rounded-1.5 border"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          );
+        })}
         <FormField
           control={form.control}
           name="categories"

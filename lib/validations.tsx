@@ -132,3 +132,11 @@ export const ProductSchema = z.object({
     .min(1, { message: "Code is required." })
     .max(100, { message: "Code cannot exceed 100 characters." }),
 });
+
+export const EditProductSchema = ProductSchema.extend({
+  productID: z.string().min(1, { message: "product ID is required." }),
+});
+
+export const GetProductSchema = z.object({
+  productID: z.string().min(1, { message: "product ID is required." }),
+});

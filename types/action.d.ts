@@ -25,3 +25,11 @@ interface CreateProductParams {
   categories: string[];
   code: string;
 }
+
+interface EditProductParams extends CreateProductParams {
+  productID: string;
+}
+
+interface GetProductParams {
+  productID: string;
+}
