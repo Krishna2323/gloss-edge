@@ -62,6 +62,7 @@ const AuthForm = <T extends FieldValues>({
       toast({
         title: `Error ${result?.status}`,
         description: result?.error?.message,
+        type: "error",
       });
     }
   };

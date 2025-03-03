@@ -4,6 +4,7 @@ import { toast as sonnerToast } from "sonner";
 type ToastOptions = {
   title?: string;
   description?: string;
+  type?: "success" | "info" | "warning" | "error";
   action?: {
     label: string;
     onClick: () => void;
@@ -11,8 +12,14 @@ type ToastOptions = {
   duration?: number;
 };
 
-function toast({ title, description, action, duration }: ToastOptions) {
-  sonnerToast(title, {
+function toast({
+  title,
+  description,
+  type = "success",
+  action,
+  duration,
+}: ToastOptions) {
+  sonnerToast[type](title, {
     description,
     duration,
     action: action
