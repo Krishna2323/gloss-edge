@@ -8,6 +8,7 @@ export interface IUser {
   image?: string;
   address?: string;
   contactNumber?: number;
+  role: string;
 }
 
 export interface IUserDoc extends IUser, Document {}
@@ -16,7 +17,11 @@ const UserSchema = new Schema<IUser>(
     name: { type: String, required: true },
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
-    // bio: { type: String },
+    role: {
+      type: String,
+      enum: ["user", "business", "admin"],
+      default: "user",
+    },
     image: { type: String },
     address: { type: String },
     contactNumber: {

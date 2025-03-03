@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+// import { auth } from "@/auth";
 import LocalSearch from "@/components/search/LocalSearch";
 import HomeFilter from "@/components/filters/HomeFilter";
 import ProductCard from "@/components/cards/ProductCard";
@@ -81,9 +81,9 @@ interface SearchParams {
 }
 
 const Home = async ({ searchParams }: SearchParams) => {
-  const session = await auth();
+  // const session = await auth();
 
-  console.log("Session: ", session);
+  // console.log("Session: ", session);
 
   const { query = "", filter = "" } = await searchParams;
 
