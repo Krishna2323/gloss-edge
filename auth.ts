@@ -51,9 +51,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async session({ session, token }) {
       session.user.id = token.sub as string;
+      session.user.role = token.role as string;
       return session;
     },
-    async jwt({ token, account }) {
+    async jwt({ token, account, user }) {
+      if (user) {
+        token.sub = user.id;
+        token.role = user.role;
+      }
       if (account) {
         const { data: existingAccount, success } =
           (await api.accounts.getByProvider(
@@ -67,6 +72,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const userId = existingAccount.userId;
 
         if (userId) token.sub = userId.toString();
+
+        const { data: existingUser } = (await api.users.getById(
+          existingAccount.userId.toString()
+        )) as ActionResponse<IUserDoc>;
+
+        if (existingUser) {
+          token.sub = existingUser.id;
+          token.role = existingUser.role; // Fetch role from DB
+        }
       }
 
       return token;
