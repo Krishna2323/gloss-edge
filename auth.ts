@@ -6,6 +6,7 @@ import { api } from "./lib/api";
 import bcrypt from "bcryptjs";
 import { IUserDoc } from "./database/models/user.model";
 import { SignInSchema } from "./lib/validations";
+import { UserRole } from "./types/nextauth";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -40,7 +41,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               name: existingUser.name,
               email: existingUser.email,
               image: existingUser.image,
-              role: existingUser.role,
+              role: existingUser.role as UserRole,
             };
           }
         }
@@ -51,13 +52,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async session({ session, token }) {
       session.user.id = token.sub as string;
-      session.user.role = token.role as string;
+      session.user.role = token.role as UserRole;
       return session;
     },
     async jwt({ token, account, user }) {
       if (user) {
-        token.sub = user.id;
+        token.sub = user.id ?? token.sub;
         token.role = user.role;
+        token.email = user.email;
       }
       if (account) {
         const { data: existingAccount, success } =
@@ -78,7 +80,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         )) as ActionResponse<IUserDoc>;
 
         if (existingUser) {
-          token.sub = existingUser.id;
           token.role = existingUser.role; // Fetch role from DB
         }
       }

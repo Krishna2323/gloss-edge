@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/sheet";
 import ROUTES from "@/constants/routes";
 import NavLinks from "./NavLinks";
-import { sidebarLinks } from "@/constants";
+import { getSidebarLinks } from "@/constants";
 import { auth, signOut } from "@/auth";
 
 const MobileNavigation = async () => {
@@ -49,7 +49,10 @@ const MobileNavigation = async () => {
         <div className="no-scrollbar flex h-[calc(100vh-80px)] flex-col justify-between overflow-y-auto">
           <SheetClose asChild>
             <section className="flex h-full flex-col gap-6 pt-16">
-              <NavLinks isMobileNav links={sidebarLinks} />
+              <NavLinks
+                isMobileNav
+                links={getSidebarLinks(session?.user.role === "admin")}
+              />
             </section>
           </SheetClose>
 

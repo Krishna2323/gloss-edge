@@ -1,4 +1,4 @@
-export const sidebarLinks = [
+export const getSidebarLinks = (isAdmin?: boolean) => [
   {
     imgURL: "/icons/home.svg",
     route: "/",
@@ -9,6 +9,16 @@ export const sidebarLinks = [
     route: "/orders",
     label: "Orders",
   },
+  ...(isAdmin
+    ? [
+        {
+          imgURL: "/icons/list.svg",
+          route: "/admin",
+          label: "Admin",
+        },
+      ]
+    : []),
+
   // {
   //   imgURL: "/icons/star.svg",
   //   route: "/collection",
@@ -51,6 +61,11 @@ export const adminSidebarLinks = [
     imgURL: "/icons/category.svg",
     route: "/admin/categories",
     label: "Categories",
+  },
+  {
+    imgURL: "/icons/home.svg",
+    route: "/",
+    label: "Home",
   },
   // {
   //   imgURL: "/icons/suitcase.svg",

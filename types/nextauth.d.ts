@@ -1,19 +1,20 @@
 import { DefaultSession, DefaultUser } from "next-auth";
 
+export type UserRole = "user" | "business" | "admin";
 declare module "next-auth" {
   interface Session {
     user: DefaultSession["user"] & {
-      role: string; // Add role to the session object
+      role?: UserRole; // Add role to the session object
     };
   }
 
   interface User extends DefaultUser {
-    role: string; // Ensure role exists in User type
+    role?: UserRole; // Ensure role exists in User type
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    role?: string; // Add role to the JWT token
+    role?: UserRole; // Add role to the JWT token
   }
 }
