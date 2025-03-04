@@ -18,4 +18,4 @@ const ADMIN_ROUTES = {
   // TAGS: (id: string) => `/tags/${id}`,
 };
 
-export default ADMIN_ROUTES;
+export { ADMIN_ROUTES, ROUTES };

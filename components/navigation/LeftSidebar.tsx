@@ -1,11 +1,11 @@
 import React from "react";
 import NavLinks from "./navbar/NavLinks";
-import ROUTES from "@/constants/routes";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { getSidebarLinks } from "@/constants";
 import { auth, signOut } from "@/auth";
+import { ROUTES } from "@/constants/routes";
 
 const LeftSidebar = async () => {
   const session = await auth();

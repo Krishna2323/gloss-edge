@@ -1,10 +1,9 @@
 import Link from "next/link";
 import React from "react";
-import ROUTES from "@/constants/routes";
 // import { getTimeStamp } from "@/lib/utils";
 import Metric from "../Metric";
 import CategoryCard from "./CategoryCard";
-import ADMIN_ROUTES from "@/constants/routes";
+import { ADMIN_ROUTES, ROUTES } from "@/constants/routes";
 import { auth } from "@/auth";
 
 interface Props {
@@ -41,7 +40,9 @@ const ProductCard = async ({
 
           <Link
             href={
-              session?.user?.role === "admin" ? ADMIN_ROUTES.PRODUCT(_id) : ""
+              session?.user?.role === "admin"
+                ? ADMIN_ROUTES.PRODUCT(_id)
+                : ROUTES.PRODUCT(_id)
             }
           >
             <h3 className="sm:h3-semibold base-semibold text-dark200_light900 line-clamp-1 flex-1">

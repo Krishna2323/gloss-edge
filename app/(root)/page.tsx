@@ -10,7 +10,7 @@ interface SearchParams {
 const Home = async ({ searchParams }: SearchParams) => {
   const { page, pageSize, query, filter } = await searchParams;
 
-  const { success, data, error } = await getProducts({
+  const { data } = await getProducts({
     page: Number(page) || 1,
     pageSize: Number(pageSize) || 50,
     query: query || "",

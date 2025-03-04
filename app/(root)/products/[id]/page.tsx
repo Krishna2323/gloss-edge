@@ -1,9 +1,9 @@
 import React from "react";
 
-const QuestionDetails = async ({ params }: RouteParams) => {
+const ProductDetails = async ({ params }: RouteParams) => {
   const { id } = await params;
 
-  return <div>Question Page: {id}</div>;
+  return <div>Product Page: {id}</div>;
 };
 
-export default QuestionDetails;
+export default ProductDetails;

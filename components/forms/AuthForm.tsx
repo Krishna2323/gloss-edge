@@ -19,10 +19,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import ROUTES from "@/constants/routes";
 import { Button } from "../ui/button";
 import { useToast } from "@/hooks/useToast";
 import { useRouter } from "next/navigation";
+import { ROUTES } from "@/constants/routes";
 
 interface AuthFormProps<T extends FieldValues> {
   schema: ZodType<T>;

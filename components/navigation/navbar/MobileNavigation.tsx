@@ -9,10 +9,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import ROUTES from "@/constants/routes";
 import NavLinks from "./NavLinks";
 import { getSidebarLinks } from "@/constants";
 import { auth, signOut } from "@/auth";
+import { ROUTES } from "@/constants/routes";
 
 const MobileNavigation = async () => {
   const session = await auth();
