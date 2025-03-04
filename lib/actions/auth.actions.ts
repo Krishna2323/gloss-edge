@@ -38,8 +38,6 @@ export async function signUpWithCredentials(
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    console.log(hashedPassword);
-
     const [newUser] = await User.create([{ username, name, email }], {
       session,
     });

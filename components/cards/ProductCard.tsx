@@ -1,11 +1,9 @@
 import Link from "next/link";
 import React from "react";
-
 import ROUTES from "@/constants/routes";
 // import { getTimeStamp } from "@/lib/utils";
-
-import TagCard from "./CategoryCard";
 import Metric from "../Metric";
+import CategoryCard from "./CategoryCard";
 
 interface Props {
   question: Product;
@@ -30,7 +28,7 @@ const ProductCard = ({
   },
 }: Props) => {
   return (
-    <div className="card-wrapper min-w-56 rounded-[10px] border border-orange-100 p-6 shadow-lg sm:px-8">
+    <div className="card-wrapper min-w-56 grow rounded-[10px] border border-orange-100 p-6 shadow-lg sm:px-8">
       <div className="flex flex-col-reverse items-start justify-between gap-5 sm:flex-row">
         <div>
           {/* <span className="subtle-regular text-dark400_light700 line-clamp-1 flex sm:hidden">
@@ -84,7 +82,7 @@ const ProductCard = ({
       </div>
       <div className="mt-3.5 flex w-full flex-wrap gap-2">
         {categories.map((category) => (
-          <TagCard
+          <CategoryCard
             key={category._id}
             _id={category._id}
             name={category.name}

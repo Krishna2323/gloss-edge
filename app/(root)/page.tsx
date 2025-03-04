@@ -39,7 +39,7 @@ const Home = async ({ searchParams }: SearchParams) => {
           products.map((product) => (
             <ProductCard key={product._id} question={product} />
           ))}
-      </div>{" "}
+      </div>
     </>
   );
 };
