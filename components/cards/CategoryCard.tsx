@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-
-import ROUTES from "@/constants/routes";
 import { getDeviconClassName } from "@/lib/utils";
 
 import { Badge } from "../ui/badge";
