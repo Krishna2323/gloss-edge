@@ -1,23 +1,39 @@
 export const getSidebarLinks = (isAdmin?: boolean) => [
-  {
-    imgURL: "/icons/home.svg",
-    route: "/",
-    label: "Home",
-  },
-  {
-    imgURL: "/icons/list.svg",
-    route: "/orders",
-    label: "Orders",
-  },
   ...(isAdmin
     ? [
         {
-          imgURL: "/icons/list.svg",
+          imgURL: "/icons/dashboard.svg",
           route: "/admin",
-          label: "Admin",
+          label: "Dashboard",
+        },
+        {
+          imgURL: "/icons/list.svg",
+          route: "/admin/products",
+          label: "Products",
+        },
+        {
+          imgURL: "/icons/category.svg",
+          route: "/admin/categories",
+          label: "Categories",
+        },
+        {
+          imgURL: "/icons/home.svg",
+          route: "/",
+          label: "Home",
         },
       ]
-    : []),
+    : [
+        {
+          imgURL: "/icons/home.svg",
+          route: "/",
+          label: "Home",
+        },
+        {
+          imgURL: "/icons/list.svg",
+          route: "/orders",
+          label: "Orders",
+        },
+      ]),
 
   // {
   //   imgURL: "/icons/star.svg",

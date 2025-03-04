@@ -17,7 +17,7 @@ interface Props {
 }
 
 const CategoryCard = ({
-  _id,
+  // _id,
   name,
   questions,
   showCount,
