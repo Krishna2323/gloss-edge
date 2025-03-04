@@ -120,7 +120,7 @@ const AddEditProductDialog = ({ isEditAction, product }: Props) => {
           description: "Product created successfully",
         });
 
-        if (result.data) redirect(`/admin/products/${result.data._id}`);
+        // if (result.data) redirect(`/admin/products/add`);
       } else {
         toast({
           type: "error",
