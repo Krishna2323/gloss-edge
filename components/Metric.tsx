@@ -8,7 +8,7 @@ interface Props {
   value: string | number;
   title: string;
   href?: string;
-  textStyles: string;
+  textStyles?: string;
   imgStyles?: string;
   isAuthor?: boolean;
 }
@@ -27,32 +27,31 @@ const Metric = ({
     <>
       <Image
         src={imgUrl}
-        width={18}
-        height={18}
+        width={14}
+        height={14}
         alt={alt}
-        className={`object-contain ${imgStyles}`}
+        className={`object-contain ${imgStyles} mr-1`}
       />
-
+      <span
+        className={`line-clamp-1 text-sm ${isAuthor ? "max-sm:hidden" : ""}`}
+      >
+        {title}
+      </span>
+      <span className="mr-1 font-bold">:</span>
       <p
-        className={`${textStyles} flex items-center gap-1 text-sm font-semibold`}
+        className={`${textStyles} flex items-center gap-1 text-sm font-semibold text-primary-500`}
       >
         {value}
-
-        <span
-          className={`line-clamp-1 text-sm ${isAuthor ? "max-sm:hidden" : ""}`}
-        >
-          {title}
-        </span>
       </p>
     </>
   );
 
   return href ? (
-    <Link href={href} className="flex-center gap-1">
+    <Link href={href} className="flex-center">
       {metricContent}
     </Link>
   ) : (
-    <div className="flex-center gap-1">{metricContent}</div>
+    <div className="flex-center ">{metricContent}</div>
   );
 };
 

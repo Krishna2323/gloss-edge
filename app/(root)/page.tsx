@@ -1,104 +1,23 @@
-// import { auth } from "@/auth";
 import LocalSearch from "@/components/search/LocalSearch";
 import HomeFilter from "@/components/filters/HomeFilter";
 import ProductCard from "@/components/cards/ProductCard";
-
-const products = [
-  {
-    _id: "2",
-    brand: "LuxePanel",
-    title: "Glossy White Self Adhesive Acrylic",
-    description:
-      "High-quality glossy white acrylic sheet with strong adhesive backing.",
-    categories: [
-      { _id: "1", name: "Acrylic" },
-      { _id: "3", name: "Interior Design" },
-    ],
-    createdAt: new Date("2022-05-15"),
-    code: "LP-101",
-    stock: 15,
-  },
-  {
-    _id: "3",
-    brand: "Reflecto",
-    title: "Mirror Finish Acrylic Sheet",
-    description:
-      "Premium mirror-finish acrylic sheet, perfect for decor and furniture applications.",
-    categories: [
-      { _id: "1", name: "Acrylic" },
-      { _id: "2", name: "Furniture Decor" },
-      { _id: "4", name: "Wall Panels" },
-    ],
-    createdAt: new Date("2023-02-10"),
-    code: "RF-502",
-    stock: 10,
-  },
-  {
-    _id: "4",
-    brand: "GlossEdge",
-    title: "Frosted Blue Acrylic Sheet",
-    description: "Elegant frosted blue acrylic for a modern look.",
-    categories: [
-      { _id: "1", name: "Acrylic" },
-      { _id: "5", name: "Kitchen Decor" },
-    ],
-    createdAt: new Date("2023-08-21"),
-    code: "GE-305",
-    stock: 30,
-  },
-  {
-    _id: "5",
-    brand: "DecoPanel",
-    title: "Textured Black Acrylic Panel",
-    description:
-      "Scratch-resistant, textured black acrylic panel suitable for furniture and interiors.",
-    categories: [
-      { _id: "1", name: "Acrylic" },
-      { _id: "2", name: "Furniture Decor" },
-      { _id: "6", name: "Commercial Interiors" },
-    ],
-    createdAt: new Date("2024-01-05"),
-    code: "DP-707",
-    stock: 18,
-  },
-  {
-    _id: "6",
-    brand: "Acrylux",
-    title: "Transparent Acrylic Sheet",
-    description: "Crystal-clear acrylic sheet for various applications.",
-    categories: [
-      { _id: "1", name: "Acrylic" },
-      { _id: "7", name: "Signage" },
-    ],
-    createdAt: new Date("2024-02-18"),
-    code: "AX-900",
-    stock: 25,
-  },
-];
+import { getProducts } from "@/lib/actions/product.actions";
 
 interface SearchParams {
   searchParams: Promise<{ [key: string]: string }>;
 }
 
 const Home = async ({ searchParams }: SearchParams) => {
-  // const session = await auth();
+  const { page, pageSize, query, filter } = await searchParams;
 
-  // console.log("Session: ", session);
-
-  const { query = "", filter = "" } = await searchParams;
-
-  const filteredQuestions = products.filter((product) => {
-    const matchesQuery =
-      product.title.toLowerCase().includes(query.toLowerCase()) ||
-      product.code.toLowerCase().includes(query.toLowerCase());
-    const matchesFilter = filter
-      ? // ? question.category[0].name.toLowerCase() === filter.toLowerCase()
-        product.categories.some(
-          (c) => c.name.toLowerCase() === filter.toLowerCase()
-        )
-      : true;
-    return matchesQuery && matchesFilter;
+  const { success, data, error } = await getProducts({
+    page: Number(page) || 1,
+    pageSize: Number(pageSize) || 50,
+    query: query || "",
+    filter: filter || "",
   });
+
+  const { products } = data || {};
 
   return (
     <>
@@ -114,10 +33,12 @@ const Home = async ({ searchParams }: SearchParams) => {
         />
       </section>
       <HomeFilter />
-      <div className="mt-10 flex w-full flex-col gap-6">
-        {filteredQuestions.map((question) => (
-          <ProductCard key={question._id} question={question} />
-        ))}
+      <div className="mt-10 flex w-full flex-wrap gap-6">
+        {products &&
+          products.length &&
+          products.map((product) => (
+            <ProductCard key={product._id} question={product} />
+          ))}
       </div>{" "}
     </>
   );

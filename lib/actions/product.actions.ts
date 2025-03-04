@@ -1,24 +1,26 @@
 "use server";
 
-import mongoose from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
 import action from "../handlers/action";
 import handleError from "../handlers/error";
 import {
   EditProductSchema,
   GetProductSchema,
+  PaginatedSearchParamsSchema,
   ProductSchema,
 } from "../validations";
-import Product from "@/database/models/product.model";
+import Product, { IProductDoc } from "@/database/models/product.model";
 import CategoryProduct from "@/database/models/category-product.model";
 import Category, { ICategoryDoc } from "@/database/models/category.model";
 
 export async function createProduct(
   params: CreateProductParams
-): Promise<ActionResponse<Product>> {
+): Promise<ActionResponse<IProductDoc>> {
   const validationResult = await action({
     params,
     schema: ProductSchema,
     authorize: true,
+    isAdminAction: true,
   });
 
   if (validationResult instanceof Error) {
@@ -80,11 +82,12 @@ export async function createProduct(
 
 export async function editProduct(
   params: EditProductParams
-): Promise<ActionResponse<Product>> {
+): Promise<ActionResponse<IProductDoc>> {
   const validationResult = await action({
     params,
     schema: EditProductSchema,
     authorize: true,
+    isAdminAction: true,
   });
 
   if (validationResult instanceof Error) {
@@ -118,32 +121,35 @@ export async function editProduct(
       product.code = code;
       await product.save({ session });
     }
-
     const categoriesToAdd = categories.filter(
-      (category) => !product.categories.includes(category.toLowerCase())
+      (category) =>
+        !product.categories.some((t: ICategoryDoc) =>
+          t.name.toLowerCase().includes(category.toLowerCase())
+        )
     );
+
     const categoriesToRemove = product.categories.filter(
       (category: ICategoryDoc) =>
-        !categories.includes(category.name.toLowerCase())
+        !categories.some((c) => c.toLowerCase() === category.name.toLowerCase())
     );
 
-    const newTagDocuments = [];
+    const newCategoryDocuments = [];
 
     if (categoriesToAdd.length > 0) {
       for (const category of categoriesToAdd) {
-        const existingTag = await Category.findOneAndUpdate(
-          { name: { $regex: new RegExp(`^${category}$`, "i") } },
+        const existingCategory = await Category.findOneAndUpdate(
+          { name: { $regex: `^${category}$`, options: "i" } },
           { $setOnInsert: { name: category }, $inc: { products: 1 } },
           { upsert: true, new: true, session }
         );
 
-        if (existingTag) {
-          newTagDocuments.push({
-            category: existingTag._id,
+        if (existingCategory) {
+          newCategoryDocuments.push({
+            category: existingCategory._id,
             product: productID,
           });
 
-          product.categories.push(existingTag._id);
+          product.categories.push(existingCategory._id);
         }
       }
     }
@@ -165,13 +171,15 @@ export async function editProduct(
       );
 
       product.categories = product.categories.filter(
-        (categoryID: mongoose.Types.ObjectId) =>
-          !categoriesToRemove.includes(categoryID)
+        (category: mongoose.Types.ObjectId) =>
+          !categoryIdsToRemove.some((id: mongoose.Types.ObjectId) =>
+            id.equals(category._id)
+          )
       );
     }
 
-    if (newTagDocuments.length > 0) {
-      await CategoryProduct.insertMany(newTagDocuments, { session });
+    if (newCategoryDocuments.length > 0) {
+      await CategoryProduct.insertMany(newCategoryDocuments, { session });
     }
 
     await product.save({ session });
@@ -209,6 +217,73 @@ export async function getProduct(
     }
 
     return { success: true, data: JSON.parse(JSON.stringify(product)) };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
+
+export async function getProducts(
+  params: PaginatedSearchParams
+): Promise<ActionResponse<{ products: Product[]; isNext: boolean }>> {
+  const validationResult = await action({
+    params,
+    schema: PaginatedSearchParamsSchema,
+    isAdminAction: false,
+  });
+
+  if (validationResult instanceof Error) {
+    return handleError(validationResult) as ErrorResponse;
+  }
+
+  const { page = 1, pageSize = 10, query, filter } = params;
+  const skip = (Number(page) - 1) * pageSize;
+  const limit = Number(pageSize);
+  const filterQuery: FilterQuery<typeof Product> = {};
+
+  if (filter === "recommended") {
+    return { success: true, data: { products: [], isNext: false } };
+  }
+
+  if (query) {
+    filterQuery.$or = [
+      { title: { $regex: new RegExp(query, "i") } },
+      { description: { $regex: new RegExp(query, "i") } },
+      { code: { $regex: new RegExp(query, "i") } },
+    ];
+  }
+
+  let sortCriteria = {};
+  switch (filter) {
+    case "newest":
+      sortCriteria = { createdAt: -1 };
+      break;
+    // case "unanswered":
+    //   filterQuery.answers = 0;
+    //   sortCriteria = { createdAt: -1 };
+    //   break;
+    case "popular":
+      sortCriteria = { upvotes: -1 };
+      break;
+    default:
+      sortCriteria = { createdAt: -1 };
+      break;
+  }
+
+  try {
+    const totalQuestions = await Product.countDocuments(filterQuery);
+    const products = await Product.find(filterQuery)
+      .populate("categories", "name")
+      // .populate("author", "name image")
+      .lean()
+      .sort(sortCriteria)
+      .skip(skip)
+      .limit(limit);
+    const isNext = totalQuestions > skip + products.length;
+
+    return {
+      success: true,
+      data: { products: JSON.parse(JSON.stringify(products)), isNext },
+    };
   } catch (error) {
     return handleError(error) as ErrorResponse;
   }

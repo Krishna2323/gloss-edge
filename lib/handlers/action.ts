@@ -12,6 +12,7 @@ type ActionOptions<T> = {
   params?: T;
   schema?: ZodSchema<T>;
   authorize?: boolean;
+  isAdminAction?: boolean;
 };
 
 // 1. Checking whether the schema and params are provided and validated.
@@ -23,6 +24,7 @@ async function action<T>({
   params,
   schema,
   authorize = false,
+  isAdminAction = false,
 }: ActionOptions<T>) {
   if (schema && params) {
     try {
@@ -44,6 +46,9 @@ async function action<T>({
     session = await auth();
 
     if (!session) {
+      return new UnauthorizedError();
+    }
+    if (isAdminAction && session.user.role !== "admin") {
       return new UnauthorizedError();
     }
   }

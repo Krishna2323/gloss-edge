@@ -30,7 +30,7 @@ const ProductCard = ({
   },
 }: Props) => {
   return (
-    <div className="card-wrapper rounded-[10px] border border-orange-100 p-9 px-6 shadow-lg sm:px-11">
+    <div className="card-wrapper min-w-56 rounded-[10px] border border-orange-100 p-6 shadow-lg sm:px-8">
       <div className="flex flex-col-reverse items-start justify-between gap-5 sm:flex-row">
         <div>
           {/* <span className="subtle-regular text-dark400_light700 line-clamp-1 flex sm:hidden">
@@ -45,18 +45,7 @@ const ProductCard = ({
         </div>
       </div>
 
-      <div className="mt-3.5 flex w-full flex-wrap gap-2">
-        {categories.map((category) => (
-          <TagCard
-            key={category._id}
-            _id={category._id}
-            name={category.name}
-            compact
-          />
-        ))}
-      </div>
-
-      <div className="flex-between mt-6 w-full flex-wrap gap-3">
+      <div className="flex-between my-3 w-full flex-wrap gap-3">
         {/* <Metric
           imgUrl={author.image}
           alt={author.name}
@@ -73,7 +62,7 @@ const ProductCard = ({
             alt="quantity"
             value={stock}
             title=" Stock"
-            textStyles="text-dark400_light800"
+            // textStyles="text-dark400_light800"
             imgStyles="invert-colors"
           />
           <Metric
@@ -81,7 +70,7 @@ const ProductCard = ({
             alt="Code"
             value={code}
             title=" Code"
-            textStyles="text-dark400_light800"
+            // textStyles="text-dark400_light800"
             imgStyles="invert-colors"
           />
           {/* <Metric
@@ -92,6 +81,16 @@ const ProductCard = ({
             textStyles="small-medium text-dark400_light800"
           /> */}
         </div>
+      </div>
+      <div className="mt-3.5 flex w-full flex-wrap gap-2">
+        {categories.map((category) => (
+          <TagCard
+            key={category._id}
+            _id={category._id}
+            name={category.name}
+            compact
+          />
+        ))}
       </div>
       <p className="mt-4 text-sm">{description}</p>
     </div>
