@@ -21,10 +21,10 @@ const Home = async ({ searchParams }: SearchParams) => {
 
   return (
     <>
-      <section className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">
-        <h1 className="h1-bold text-dark100_light900">All Products</h1>
+      <section className="flex w-full flex-col-reverse justify-between gap-2 sm:flex-row sm:items-center">
+        <h1 className="h2-bold text-dark100_light900">All Products</h1>
       </section>
-      <section className="mt-11">
+      <section className="mt-4">
         <LocalSearch
           route="/"
           imgSrc="/icons/search.svg"
