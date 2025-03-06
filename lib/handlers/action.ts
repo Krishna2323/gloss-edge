@@ -13,6 +13,7 @@ type ActionOptions<T> = {
   schema?: ZodSchema<T>;
   authorize?: boolean;
   isAdminAction?: boolean;
+  isBusinessAction?: boolean;
 };
 
 // 1. Checking whether the schema and params are provided and validated.
@@ -25,6 +26,7 @@ async function action<T>({
   schema,
   authorize = false,
   isAdminAction = false,
+  isBusinessAction = true,
 }: ActionOptions<T>) {
   if (schema && params) {
     try {
@@ -47,6 +49,15 @@ async function action<T>({
 
     if (!session) {
       return new UnauthorizedError();
+    }
+    if (
+      isBusinessAction &&
+      session.user.role !== "business" &&
+      session.user.role !== "admin"
+    ) {
+      return new UnauthorizedError(
+        "Only business acccounts can see this data!"
+      );
     }
     if (isAdminAction && session.user.role !== "admin") {
       return new UnauthorizedError();
