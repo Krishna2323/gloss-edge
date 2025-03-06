@@ -12,9 +12,16 @@ interface Props {
   imgSrc: string;
   placeholder: string;
   otherClasses?: string;
+  disabled?: boolean;
 }
 
-const LocalSearch = ({ route, imgSrc, placeholder, otherClasses }: Props) => {
+const LocalSearch = ({
+  route,
+  imgSrc,
+  placeholder,
+  otherClasses,
+  disabled,
+}: Props) => {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -60,6 +67,7 @@ const LocalSearch = ({ route, imgSrc, placeholder, otherClasses }: Props) => {
       />
 
       <Input
+        disabled={disabled}
         type="text"
         placeholder={placeholder}
         value={searchQuery}

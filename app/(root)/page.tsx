@@ -1,30 +1,27 @@
-import LocalSearch from "@/components/search/LocalSearch";
-import HomeFilter from "@/components/filters/HomeFilter";
-import ProductCard from "@/components/cards/ProductCard";
-import { getProducts } from "@/lib/actions/product.actions";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import LoginAsBusiness from "@/components/auth/LoginAsBusiness";
+import { auth } from "@/auth";
 
-interface SearchParams {
-  searchParams: Promise<{ [key: string]: string }>;
-}
-
-const Home = async ({ searchParams }: SearchParams) => {
-  const { page, pageSize, query, filter } = await searchParams;
-
-  const { data } = await getProducts({
-    page: Number(page) || 1,
-    pageSize: Number(pageSize) || 50,
-    query: query || "",
-    filter: filter || "",
-  });
-
-  const { products = [] } = data || {};
-
+const Home = async () => {
+  const session = await auth();
   return (
     <>
-      <section className="flex w-full flex-col-reverse justify-between gap-2 sm:flex-row sm:items-center">
-        <h1 className="h2-bold text-dark100_light900">All Products</h1>
-      </section>
-      <section className="mt-4">
+      {!session?.user.role || session.user.role === "user" ? (
+        <section className="flex">
+          <LoginAsBusiness text="Only business accounts can see the inventory." />
+        </section>
+      ) : (
+        <section className="mt-10 flex flex-col-reverse items-center justify-center gap-2 sm:flex-row">
+          <Button
+            asChild
+            className="primary-gradient paragraph-medium min-h-12 w-full rounded-2 px-4 py-3 font-inter !text-light-900"
+          >
+            <Link href={"/products"}>View Products</Link>
+          </Button>
+        </section>
+      )}
+      {/* <section className="mt-4">
         <LocalSearch
           route="/"
           imgSrc="/icons/search.svg"
@@ -33,13 +30,15 @@ const Home = async ({ searchParams }: SearchParams) => {
         />
       </section>
       <HomeFilter />
-      <div className="mt-10 flex w-full flex-wrap gap-6">
-        {products &&
-          products.length &&
-          products.map((product) => (
-            <ProductCard key={product._id} question={product} />
-          ))}
-      </div>
+      <section>
+        <div className="mt-10 flex w-full flex-wrap gap-6">
+          {products &&
+            products.length &&
+            products.map((product) => (
+              <ProductCard key={product._id} question={product} />
+            ))}
+        </div>
+      </section> */}
     </>
   );
 };

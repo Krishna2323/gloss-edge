@@ -51,7 +51,7 @@ const MobileNavigation = async () => {
             <section className="flex h-full flex-col gap-6 pt-16">
               <NavLinks
                 isMobileNav
-                links={getSidebarLinks(session?.user.role === "admin")}
+                links={getSidebarLinks(session?.user.role)}
               />
             </section>
           </SheetClose>
