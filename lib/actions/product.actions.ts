@@ -229,6 +229,7 @@ export async function getProducts(
     params,
     schema: PaginatedSearchParamsSchema,
     isAdminAction: false,
+    authorize: true,
   });
 
   if (validationResult instanceof Error) {
