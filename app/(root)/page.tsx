@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import LoginAsBusiness from "@/components/auth/LoginAsBusiness";
-import { auth } from "@/auth";
+import { auth, signOut } from "@/auth";
 import Image from "next/image";
 import { ROUTES } from "@/constants/routes";
 
@@ -12,39 +12,57 @@ const Home = async () => {
       {!session?.user.role || session.user.role === "user" ? (
         <section className="gap-10">
           <LoginAsBusiness text="Only business accounts can see the inventory." />
-          <div className="flex flex-col gap-3">
-            <Button
-              className="body-bold btn-secondary min-h-[41px] w-full rounded-lg px-4 py-3 shadow-none"
-              asChild
-            >
-              <Link href={ROUTES.SIGN_IN}>
-                <Image
-                  src="/icons/sign-in.svg"
+          {session?.user.role ? (
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={async () => await signOut()}
+                className="body-bold btn-secondary min-h-[41px] w-full rounded-lg px-4 py-3 shadow-none"
+              >
+                {/* <Image
+                  src="/icons/out.svg"
                   alt="Account"
-                  width={24}
-                  height={24}
-                  className="invert-colors"
-                />
-                <span className=" ">Log In</span>
-              </Link>
-            </Button>
+                  width={28}
+                  height={28}
+                  className="invert-colors lg:hidden"
+                /> */}
+                <span className="primary-text-gradient">Sign Out</span>
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <Button
+                className="body-bold btn-secondary min-h-[41px] w-full rounded-lg px-4 py-3 shadow-none"
+                asChild
+              >
+                <Link href={ROUTES.SIGN_IN}>
+                  <Image
+                    src="/icons/sign-in.svg"
+                    alt="Account"
+                    width={24}
+                    height={24}
+                    className="invert-colors"
+                  />
+                  <span className=" ">Log In</span>
+                </Link>
+              </Button>
 
-            <Button
-              className="body-bold light-border-2 btn text-dark400_light900 min-h-[41px] w-full rounded-lg border px-4 py-3 shadow-none"
-              asChild
-            >
-              <Link href={ROUTES.SIGN_UP}>
-                <Image
-                  src="/icons/sign-up.svg"
-                  alt="Account"
-                  width={24}
-                  height={24}
-                  className="invert-colors"
-                />
-                <span className="primary-text-gradient">Sign Up</span>
-              </Link>
-            </Button>
-          </div>
+              <Button
+                className="body-bold light-border-2 btn text-dark400_light900 min-h-[41px] w-full rounded-lg border px-4 py-3 shadow-none"
+                asChild
+              >
+                <Link href={ROUTES.SIGN_UP}>
+                  <Image
+                    src="/icons/sign-up.svg"
+                    alt="Account"
+                    width={24}
+                    height={24}
+                    className="invert-colors"
+                  />
+                  <span className="primary-text-gradient">Sign Up</span>
+                </Link>
+              </Button>
+            </div>
+          )}
         </section>
       ) : (
         <section className="mt-10 flex flex-col-reverse items-center justify-center gap-2 sm:flex-row">
