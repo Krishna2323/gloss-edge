@@ -13,21 +13,29 @@ const Home = async () => {
         <section className="gap-10">
           <LoginAsBusiness text="Only business accounts can see the inventory." />
           {session?.user.role ? (
-            <div className="flex flex-col gap-3">
-              <Button
-                onClick={async () => await signOut()}
-                className="body-bold btn-secondary min-h-[41px] w-full rounded-lg px-4 py-3 shadow-none"
-              >
-                {/* <Image
-                  src="/icons/out.svg"
-                  alt="Account"
-                  width={28}
-                  height={28}
-                  className="invert-colors lg:hidden"
-                /> */}
-                <span className="primary-text-gradient">Sign Out</span>
-              </Button>
-            </div>
+            <form
+              action={async () => {
+                "use server";
+
+                await signOut();
+              }}
+            >
+              <div className="flex flex-col gap-3">
+                <Button
+                  type="submit"
+                  className="body-bold btn-secondary min-h-[41px] w-full rounded-lg px-4 py-3 shadow-none"
+                >
+                  {/* <Image
+                            src="/icons/sign-up.svg"
+                            alt="Account"
+                            width={28}
+                            height={28}
+                            className="invert-colors lg:hidden"
+                          /> */}
+                  <span className="primary-text-gradient">Sign Out</span>
+                </Button>
+              </div>
+            </form>
           ) : (
             <div className="flex flex-col gap-3">
               <Button
