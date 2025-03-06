@@ -17,7 +17,7 @@ const Home = async ({ searchParams }: SearchParams) => {
     filter: filter || "",
   });
 
-  const { products } = data || {};
+  const { products = [] } = data || {};
 
   return (
     <>

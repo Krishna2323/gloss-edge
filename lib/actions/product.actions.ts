@@ -247,6 +247,7 @@ export async function getProducts(
   if (query) {
     filterQuery.$or = [
       { title: { $regex: new RegExp(query, "i") } },
+      { brand: { $regex: new RegExp(query, "i") } },
       { description: { $regex: new RegExp(query, "i") } },
       { code: { $regex: new RegExp(query, "i") } },
     ];
