@@ -22,7 +22,7 @@ export async function signUpWithCredentials(
 
   const session = await mongoose.startSession();
   session.startTransaction();
-
+  let transactionCommitted = false;
   try {
     const existingUser = await User.findOne({ email }).session(session);
 
@@ -56,12 +56,15 @@ export async function signUpWithCredentials(
     );
 
     await session.commitTransaction();
+    transactionCommitted = true;
 
     await signIn("credentials", { email, password, redirect: false });
 
     return { success: true };
   } catch (error) {
-    await session.abortTransaction();
+    if (!transactionCommitted) {
+      await session.abortTransaction();
+    }
 
     return handleError(error) as ErrorResponse;
   } finally {

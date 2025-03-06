@@ -51,8 +51,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async session({ session, token }) {
-      session.user.id = token.sub as string;
-      session.user.role = token.role as UserRole;
+      if (
+        (token?.role && token?.role === "admin") ||
+        token?.role === "business"
+      ) {
+        session.user.id = token.sub!;
+        session.user.role = token.role; // Ensure fresh role
+        return session;
+      }
+      const { data: existingUser } = (await api.users.getById(
+        token.sub!
+      )) as ActionResponse<IUserDoc>;
+
+      session.user.id = token.sub!;
+      session.user.role = (existingUser?.role as UserRole) || token.role; // Ensure fresh role
+
       return session;
     },
     async jwt({ token, account, user }) {
