@@ -20,6 +20,17 @@ interface Product {
   code: string;
 }
 
+interface User {
+  _id: string;
+  name: string;
+  username: string;
+  email: string;
+  image?: string;
+  address?: string;
+  contactNumber?: number;
+  role: string;
+}
+
 type ActionResponse<T = null> = {
   success: boolean;
   data?: T;

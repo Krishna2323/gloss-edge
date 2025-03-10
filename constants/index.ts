@@ -14,6 +14,11 @@ export const getSidebarLinks = (role: UserRole | undefined) => [
           label: "Dashboard",
         },
         {
+          imgURL: "/icons/user.svg",
+          route: "/admin/users",
+          label: "Users",
+        },
+        {
           imgURL: "/icons/list.svg",
           route: "/admin/products",
           label: "Products",
@@ -22,11 +27,6 @@ export const getSidebarLinks = (role: UserRole | undefined) => [
           imgURL: "/icons/category.svg",
           route: "/admin/categories",
           label: "Categories",
-        },
-        {
-          imgURL: "/icons/home.svg",
-          route: "/",
-          label: "Home",
         },
       ]
     : []),

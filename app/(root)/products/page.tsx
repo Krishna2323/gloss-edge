@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import LoginAsBusiness from "@/components/auth/LoginAsBusiness";
+import InfoText from "@/components/auth/InfoText";
 import ProductCard from "@/components/cards/ProductCard";
 import HomeFilter from "@/components/filters/HomeFilter";
 import LocalSearch from "@/components/search/LocalSearch";
@@ -15,9 +15,7 @@ const page = async ({ searchParams }: SearchParams) => {
   const session = await auth();
 
   if (!session?.user.role || session.user.role === "user") {
-    return (
-      <LoginAsBusiness text="Only business accounts can see the inventory." />
-    );
+    return <InfoText text="Only business accounts can see the inventory." />;
   }
   const { data } = await getProducts({
     page: Number(page) || 1,
@@ -51,13 +49,13 @@ const page = async ({ searchParams }: SearchParams) => {
             ))}
 
           {products && !products.length ? (
-            <LoginAsBusiness
+            <InfoText
               text={
                 query || filter ? "No results found!" : "No products to show"
               }
             />
           ) : (
-            <LoginAsBusiness text="Only business accounts can see the inventory." />
+            <InfoText text="Only business accounts can see the inventory." />
           )}
         </div>
       </section>

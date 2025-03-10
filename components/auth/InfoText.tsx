@@ -1,6 +1,6 @@
 import React from "react";
 
-const LoginAsBusiness = ({ text }: { text: string }) => {
+const InfoText = ({ text }: { text: string }) => {
   return (
     <section className="mt-8 flex w-full flex-col-reverse justify-between gap-2 p-6 text-center sm:flex-row sm:items-center">
       <h1 className="h2-semibold text-dark100_light900 w-full text-center">
@@ -10,4 +10,4 @@ const LoginAsBusiness = ({ text }: { text: string }) => {
   );
 };
 
-export default LoginAsBusiness;
+export default InfoText;

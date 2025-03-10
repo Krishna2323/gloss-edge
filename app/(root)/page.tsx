@@ -1,17 +1,18 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import LoginAsBusiness from "@/components/auth/LoginAsBusiness";
+import InfoText from "@/components/auth/InfoText";
 import { auth, signOut } from "@/auth";
 import Image from "next/image";
 import { ROUTES } from "@/constants/routes";
 
 const Home = async () => {
   const session = await auth();
+
   return (
     <>
       {!session?.user.role || session.user.role === "user" ? (
         <section className="gap-10">
-          <LoginAsBusiness text="Only business accounts can see the inventory." />
+          <InfoText text="Only business accounts can see the inventory." />
           {session?.user.role ? (
             <form
               action={async () => {

@@ -126,7 +126,7 @@ export const ProductSchema = z.object({
     .min(1, { message: "At least one tag is required." })
     .max(3, { message: "Cannot add more than 3 categories." }),
 
-  stock: z.number().min(1, { message: "Please enter stock." }),
+  stock: z.number().min(0, { message: "Please enter stock." }),
   code: z
     .string()
     .min(1, { message: "Code is required." })
