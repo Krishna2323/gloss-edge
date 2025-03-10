@@ -31,22 +31,32 @@ export const getSidebarLinks = (role: UserRole | undefined) => [
       ]
     : []),
 
-  ...(role
-    ? [
-        {
-          imgURL: "/icons/list.svg",
-          route: "/orders",
-          label: "Orders",
-        },
-      ]
-    : []),
+  // ...(role
+  //   ? [
+  //       {
+  //         imgURL: "/icons/list.svg",
+  //         route: "/orders",
+  //         label: "Orders",
+  //       },
+  //     ]
+  //   : []),
 ];
 
 export const adminSidebarLinks = [
   {
+    imgURL: "/icons/home.svg",
+    route: "/",
+    label: "Home",
+  },
+  {
     imgURL: "/icons/dashboard.svg",
     route: "/admin",
     label: "Dashboard",
+  },
+  {
+    imgURL: "/icons/user.svg",
+    route: "/admin/users",
+    label: "Users",
   },
   {
     imgURL: "/icons/list.svg",
@@ -57,11 +67,6 @@ export const adminSidebarLinks = [
     imgURL: "/icons/category.svg",
     route: "/admin/categories",
     label: "Categories",
-  },
-  {
-    imgURL: "/icons/home.svg",
-    route: "/",
-    label: "Home",
   },
   // {
   //   imgURL: "/icons/suitcase.svg",
