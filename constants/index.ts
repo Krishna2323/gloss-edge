@@ -30,16 +30,6 @@ export const getSidebarLinks = (role: UserRole | undefined) => [
         },
       ]
     : []),
-
-  // ...(role
-  //   ? [
-  //       {
-  //         imgURL: "/icons/list.svg",
-  //         route: "/orders",
-  //         label: "Orders",
-  //       },
-  //     ]
-  //   : []),
 ];
 
 export const adminSidebarLinks = [
@@ -68,24 +58,4 @@ export const adminSidebarLinks = [
     route: "/admin/categories",
     label: "Categories",
   },
-  // {
-  //   imgURL: "/icons/suitcase.svg",
-  //   route: "/jobs",
-  //   label: "Find Jobs",
-  // },
-  // {
-  //   imgURL: "/icons/tag.svg",
-  //   route: "/tags",
-  //   label: "Tags",
-  // },
-  // {
-  //   imgURL: "/icons/user.svg",
-  //   route: "/profile",
-  //   label: "Profile",
-  // },
-  // {
-  //   imgURL: "/icons/question.svg",
-  //   route: "/ask-question",
-  //   label: "Ask a question",
-  // },
 ];

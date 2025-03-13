@@ -12,6 +12,9 @@ import {
 import Product, { IProductDoc } from "@/database/models/product.model";
 import CategoryProduct from "@/database/models/category-product.model";
 import Category, { ICategoryDoc } from "@/database/models/category.model";
+import ProductHistory, {
+  ProductChanges,
+} from "@/database/models/product-history.model";
 
 export async function createProduct(
   params: CreateProductParams
@@ -90,12 +93,22 @@ export async function editProduct(
     isAdminAction: true,
   });
 
+  console.log(params);
+
   if (validationResult instanceof Error) {
     return handleError(validationResult) as ErrorResponse;
   }
 
-  const { productID, brand, categories, code, description, stock, title } =
-    validationResult.params!;
+  const {
+    productID,
+    brand,
+    categories,
+    code,
+    description,
+    stock,
+    title,
+    remark,
+  } = validationResult.params!;
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -106,6 +119,18 @@ export async function editProduct(
     if (!product) {
       throw new Error("Product not found");
     }
+
+    const changes: ProductChanges = {};
+
+    if (product.title !== title)
+      changes.title = { old: product.title, new: title };
+    if (product.description !== description)
+      changes.description = { old: product.description, new: description };
+    if (product.brand !== brand)
+      changes.brand = { old: product.brand, new: brand };
+    if (product.stock !== stock)
+      changes.stock = { old: product.stock, new: stock };
+    if (product.code !== code) changes.code = { old: product.code, new: code };
 
     if (
       product.title !== title ||
@@ -138,7 +163,7 @@ export async function editProduct(
     if (categoriesToAdd.length > 0) {
       for (const category of categoriesToAdd) {
         const existingCategory = await Category.findOneAndUpdate(
-          { name: { $regex: `^${category}$`, options: "i" } },
+          { name: new RegExp(`^${category}$`, "i") },
           { $setOnInsert: { name: category }, $inc: { products: 1 } },
           { upsert: true, new: true, session }
         );
@@ -176,6 +201,31 @@ export async function editProduct(
             id.equals(category._id)
           )
       );
+    }
+
+    const userId = validationResult?.session?.user?.id;
+
+    if (
+      Object.keys(changes).length > 0 ||
+      categoriesToAdd.length > 0 ||
+      categoriesToRemove.length > 0
+    ) {
+      const updatedProductHistory = await ProductHistory.create(
+        [
+          {
+            productId: productID,
+            editor: userId,
+            changes,
+            categoriesAdded: newCategoryDocuments.map((c) => c.category),
+            categoriesRemoved: categoriesToRemove.map(
+              (c: ICategoryDoc) => c._id
+            ),
+            remark,
+          },
+        ],
+        { session }
+      );
+      console.log(updatedProductHistory);
     }
 
     if (newCategoryDocuments.length > 0) {

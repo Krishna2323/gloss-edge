@@ -29,9 +29,10 @@ interface Props {
 const AddEditProductDialog = ({ isEditAction, product }: Props) => {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const schema = ProductSchema;
 
   const form = useForm({
-    resolver: zodResolver(ProductSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       title: product?.title ?? "",
       brand: product?.brand ?? "",
@@ -41,6 +42,7 @@ const AddEditProductDialog = ({ isEditAction, product }: Props) => {
       categories: product?.categories
         ? product?.categories.map((e) => e.name)
         : [],
+      remark: "",
     },
   });
 
@@ -90,10 +92,14 @@ const AddEditProductDialog = ({ isEditAction, product }: Props) => {
     }
   };
 
-  const handleCreateProduct = async (data: z.infer<typeof ProductSchema>) => {
+  const handleCreateProduct = async (data: z.infer<typeof schema>) => {
     startTransition(async () => {
       if (isEditAction && product?._id) {
-        const result = await editProduct({ productID: product._id, ...data });
+        const result = await editProduct({
+          productID: product._id,
+          ...data,
+          remark: (data?.remark as string) || "",
+        });
 
         if (result.success) {
           toast({
@@ -133,18 +139,16 @@ const AddEditProductDialog = ({ isEditAction, product }: Props) => {
 
   return (
     <Form {...form}>
-      {/* <div className="shadow-md"> */}
       <h2 className="h2-semibold text-dark100_light900 mb-6">
         {isEditAction ? "Edit" : "Add"} Product
       </h2>
-      {/* </div> */}
       <form
         onSubmit={form.handleSubmit(handleCreateProduct)}
         className="space-y-6"
       >
         {(
           Object.keys(form.formState.defaultValues ?? {}) as Array<
-            keyof z.infer<typeof ProductSchema>
+            keyof z.infer<typeof schema>
           >
         ).map((field) => {
           if (field === "categories") {

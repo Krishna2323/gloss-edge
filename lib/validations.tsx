@@ -131,10 +131,18 @@ export const ProductSchema = z.object({
     .string()
     .min(1, { message: "Code is required." })
     .max(100, { message: "Code cannot exceed 100 characters." }),
+  remark: z
+    .string()
+    .min(2, { message: "Remark is required." })
+    .max(100, { message: "Remark cannot exceed 100 characters." }),
 });
 
 export const EditProductSchema = ProductSchema.extend({
   productID: z.string().min(1, { message: "product ID is required." }),
+  // remark: z
+  //   .string()
+  //   .min(2, { message: "Remark is required." })
+  //   .max(100, { message: "Remark cannot exceed 100 characters." }),
 });
 
 export const GetProductSchema = z.object({

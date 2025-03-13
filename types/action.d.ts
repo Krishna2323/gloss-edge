@@ -28,6 +28,7 @@ interface CreateProductParams {
 
 interface EditProductParams extends CreateProductParams {
   productID: string;
+  remark: string;
 }
 
 interface GetProductParams {
