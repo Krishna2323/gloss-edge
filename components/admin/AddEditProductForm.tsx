@@ -42,7 +42,7 @@ const AddEditProductDialog = ({ isEditAction, product }: Props) => {
       categories: product?.categories
         ? product?.categories.map((e) => e.name)
         : [],
-      remark: "",
+      remark: isEditAction ? "" : "Add Product",
     },
   });
 
