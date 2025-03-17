@@ -19,6 +19,7 @@ export interface IProductHistory {
   changes: ProductChanges;
   categoriesAdded?: Types.ObjectId[];
   categoriesRemoved?: Types.ObjectId[];
+  remark?: string;
   editedAt: Date;
 }
 
@@ -32,6 +33,7 @@ const ProductHistorySchema = new Schema<IProductHistory>(
     categoriesAdded: [{ type: Schema.Types.ObjectId, ref: "Category" }],
     categoriesRemoved: [{ type: Schema.Types.ObjectId, ref: "Category" }],
     editedAt: { type: Date, default: Date.now },
+    remark: { type: String },
   },
   { timestamps: true }
 );
