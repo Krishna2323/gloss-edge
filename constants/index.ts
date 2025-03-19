@@ -1,5 +1,7 @@
 import { UserRole } from "@/types/nextauth";
 
+export const PRODUCTS_PER_PAGE = 20;
+
 export const getSidebarLinks = (role: UserRole | undefined) => [
   {
     imgURL: "/icons/home.svg",

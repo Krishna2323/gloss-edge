@@ -274,7 +274,13 @@ export async function getProduct(
 
 export async function getProducts(
   params: PaginatedSearchParams
-): Promise<ActionResponse<{ products: Product[]; isNext: boolean }>> {
+): Promise<
+  ActionResponse<{
+    products: Product[];
+    isNext: boolean;
+    totalProducts: number;
+  }>
+> {
   const validationResult = await action({
     params,
     schema: PaginatedSearchParamsSchema,
@@ -292,7 +298,10 @@ export async function getProducts(
   const filterQuery: FilterQuery<typeof Product> = {};
 
   if (filter === "recommended") {
-    return { success: true, data: { products: [], isNext: false } };
+    return {
+      success: true,
+      data: { products: [], isNext: false, totalProducts: 0 },
+    };
   }
 
   if (query) {
@@ -304,25 +313,29 @@ export async function getProducts(
     ];
   }
 
-  let sortCriteria = {};
+  const isAdmin = validationResult.session?.user.role === "admin";
+
+  let sortCriteria: Record<string, 1 | -1> = {
+    ...(isAdmin ? { stock: 1 } : {}),
+  };
   switch (filter) {
     case "newest":
-      sortCriteria = { createdAt: -1 };
+      sortCriteria = { ...sortCriteria, createdAt: -1 };
       break;
     // case "unanswered":
     //   filterQuery.answers = 0;
     //   sortCriteria = { createdAt: -1 };
     //   break;
     case "popular":
-      sortCriteria = { upvotes: -1 };
+      sortCriteria = { ...sortCriteria, upvotes: -1 };
       break;
     default:
-      sortCriteria = { createdAt: -1 };
+      sortCriteria = { ...sortCriteria, createdAt: -1 };
       break;
   }
 
   try {
-    const totalQuestions = await Product.countDocuments(filterQuery);
+    const totalProducts = await Product.countDocuments(filterQuery);
     const products = await Product.find(filterQuery)
       .populate("categories", "name")
       // .populate("author", "name image")
@@ -330,11 +343,15 @@ export async function getProducts(
       .sort(sortCriteria)
       .skip(skip)
       .limit(limit);
-    const isNext = totalQuestions > skip + products.length;
+    const isNext = totalProducts > skip + products.length;
 
     return {
       success: true,
-      data: { products: JSON.parse(JSON.stringify(products)), isNext },
+      data: {
+        products: JSON.parse(JSON.stringify(products)),
+        isNext,
+        totalProducts,
+      },
     };
   } catch (error) {
     return handleError(error) as ErrorResponse;
