@@ -36,14 +36,14 @@ const page = async ({ searchParams }: SearchParams) => {
       <section className="mt-4">
         <LocalSearch
           route="/"
-          imgSrc="/icons/search.svg"
+          imgSrc="/icons/search_coloured.svg"
           placeholder="Search products..."
           otherClasses="flex-1"
         />
       </section>
       <HomeFilter />
       <h3 className="text-dark100_light900 mt-6 p-2 text-lg">
-        {products?.length &&
+        {!!products?.length &&
           `Showing ${PRODUCTS_PER_PAGE * Number(page)} out of ${totalProducts} results.`}
       </h3>
       <section>

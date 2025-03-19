@@ -93,8 +93,6 @@ export async function editProduct(
     isAdminAction: true,
   });
 
-  console.log(params);
-
   if (validationResult instanceof Error) {
     return handleError(validationResult) as ErrorResponse;
   }
@@ -210,7 +208,7 @@ export async function editProduct(
       categoriesToAdd.length > 0 ||
       categoriesToRemove.length > 0
     ) {
-      const updatedProductHistory = await ProductHistory.create(
+      await ProductHistory.create(
         [
           {
             productId: productID,
@@ -225,7 +223,6 @@ export async function editProduct(
         ],
         { session }
       );
-      console.log(updatedProductHistory);
     }
 
     if (newCategoryDocuments.length > 0) {
@@ -272,9 +269,7 @@ export async function getProduct(
   }
 }
 
-export async function getProducts(
-  params: PaginatedSearchParams
-): Promise<
+export async function getProducts(params: PaginatedSearchParams): Promise<
   ActionResponse<{
     products: Product[];
     isNext: boolean;
