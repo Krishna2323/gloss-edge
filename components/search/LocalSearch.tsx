@@ -30,7 +30,8 @@ const LocalSearch = ({
 
   const [searchQuery, setSearchQuery] = useState(query);
 
-  const onSubmit = () => {
+  const onSubmit = (event: React.FormEvent) => {
+    event.preventDefault(); // Prevent default form submission
     if (searchQuery) {
       const newUrl = formUrlQuery({
         params: searchParams.toString(),
@@ -52,7 +53,8 @@ const LocalSearch = ({
   };
 
   return (
-    <div
+    <form
+      onSubmit={onSubmit}
       className={`background-light800_darkgradient flex min-h-[56px] grow items-center gap-4 rounded-[10px] px-4 ${otherClasses}`}
     >
       <Input
@@ -62,9 +64,8 @@ const LocalSearch = ({
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         className="paragraph-regular no-focus placeholder text-dark400_light700 border-none shadow-none outline-none"
-        onSubmit={onSubmit}
       />
-      <Button className="shadow-none" onClick={onSubmit}>
+      <Button className="shadow-none" type="submit" onClick={onSubmit}>
         <Image
           src={imgSrc}
           width={32}
@@ -73,7 +74,7 @@ const LocalSearch = ({
           className="cursor-pointer text-red-300"
         />
       </Button>
-    </div>
+    </form>
   );
 };
 
