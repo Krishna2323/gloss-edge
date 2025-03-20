@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { formUrlQuery, removeKeysFromUrlQuery } from "@/lib/url";
 
 import { Input } from "../ui/input";
@@ -27,6 +27,7 @@ const LocalSearch = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const query = searchParams.get("query") || "";
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [searchQuery, setSearchQuery] = useState(query);
 
@@ -50,6 +51,7 @@ const LocalSearch = ({
         router.push(newUrl, { scroll: false });
       }
     }
+    inputRef.current?.blur();
   };
 
   return (
@@ -59,6 +61,7 @@ const LocalSearch = ({
     >
       <Input
         disabled={disabled}
+        ref={inputRef}
         type="text"
         placeholder={placeholder}
         value={searchQuery}
