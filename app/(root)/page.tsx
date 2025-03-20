@@ -7,7 +7,6 @@ import { ROUTES } from "@/constants/routes";
 
 const Home = async () => {
   const session = await auth();
-
   return (
     <>
       {!session?.user.role || session.user.role === "user" ? (

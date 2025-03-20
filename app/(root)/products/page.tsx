@@ -6,7 +6,8 @@ import Pagination from "@/components/Pagination";
 import LocalSearch from "@/components/search/LocalSearch";
 import { PRODUCTS_PER_PAGE } from "@/constants";
 import { getProducts } from "@/lib/actions/product.actions";
-import React from "react";
+import React, { Suspense } from "react";
+import { ProductsLoading } from "./loading";
 
 interface SearchParams {
   searchParams: Promise<{ [key: string]: string }>;
@@ -42,27 +43,29 @@ const page = async ({ searchParams }: SearchParams) => {
         />
       </section>
       <HomeFilter />
-      <h3 className="text-dark100_light900 mt-6 p-2 text-lg">
-        {!!products?.length &&
-          `Showing ${PRODUCTS_PER_PAGE * Number(page)} out of ${totalProducts} results.`}
-      </h3>
-      <section>
-        <div className="mt-4 flex w-full flex-wrap gap-6">
-          {products &&
-            products.length > 0 &&
-            products.map((product) => (
-              <ProductCard key={product._id} question={product} />
-            ))}
+      <Suspense fallback={<ProductsLoading />}>
+        <h3 className="text-dark100_light900 mt-6 p-2 text-lg">
+          {!!products?.length &&
+            `Showing ${PRODUCTS_PER_PAGE * Number(page)} out of ${totalProducts} results.`}
+        </h3>
+        <section>
+          <div className="mt-4 flex w-full flex-wrap gap-6">
+            {products &&
+              products.length > 0 &&
+              products.map((product) => (
+                <ProductCard key={product._id} question={product} />
+              ))}
 
-          {products && !products.length && (
-            <InfoText
-              text={
-                query || filter ? "No results found!" : "No products to show"
-              }
-            />
-          )}
-        </div>
-      </section>
+            {products && !products.length && (
+              <InfoText
+                text={
+                  query || filter ? "No results found!" : "No products to show"
+                }
+              />
+            )}
+          </div>
+        </section>
+      </Suspense>
       {products && products.length > 0 && (
         <Pagination page={page} isNext={isNext || false} />
       )}
