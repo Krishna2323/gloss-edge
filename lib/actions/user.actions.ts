@@ -3,8 +3,11 @@
 import { User } from "@/database";
 import action from "../handlers/action";
 import handleError from "../handlers/error";
-import { ActionResponse, ErrorResponse } from "@/types/global";
-import { User as UserInterface } from "next-auth";
+import {
+  ActionResponse,
+  ErrorResponse,
+  User as UserInterface,
+} from "@/types/global";
 
 export async function getUsers(): Promise<
   ActionResponse<{ users: UserInterface[]; totalUsers: number }>
