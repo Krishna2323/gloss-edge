@@ -1,5 +1,6 @@
 import AddEditProductForm from "@/components/admin/AddEditProductForm";
 import { getProduct } from "@/lib/actions/product.actions";
+import { RouteParams } from "@/types/global";
 import { notFound } from "next/navigation";
 import React from "react";
 
