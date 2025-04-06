@@ -4,12 +4,14 @@ import InfoText from "@/components/auth/InfoText";
 import { auth, signOut } from "@/auth";
 import Image from "next/image";
 import { ROUTES } from "@/constants/routes";
+import { isAdmin } from "@/lib/utils";
 
 const Home = async () => {
   const session = await auth();
   return (
     <>
-      {!session?.user.role || session.user.role === "user" ? (
+      {(!session?.user.role || session.user.role === "user") &&
+      !isAdmin(session?.user.role) ? (
         <section className="gap-10">
           <InfoText text="Only business accounts can see the inventory." />
           {session?.user.role ? (

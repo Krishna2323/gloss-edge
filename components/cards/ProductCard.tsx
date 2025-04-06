@@ -5,6 +5,7 @@ import Metric from "../Metric";
 import CategoryCard from "./CategoryCard";
 import { ADMIN_ROUTES, ROUTES } from "@/constants/routes";
 import { auth } from "@/auth";
+import { isAdmin } from "@/lib/utils";
 
 interface Props {
   question: Product;
@@ -40,7 +41,7 @@ const ProductCard = async ({
 
           <Link
             href={
-              session?.user?.role === "admin"
+              isAdmin(session?.user?.role)
                 ? ADMIN_ROUTES.PRODUCT(_id)
                 : ROUTES.PRODUCT(_id)
             }

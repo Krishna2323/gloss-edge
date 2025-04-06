@@ -120,10 +120,10 @@ export const ProductSchema = z.object({
     .array(
       z
         .string()
-        .min(1, { message: "Tag is required." })
-        .max(30, { message: "Tag cannot exceed 30 characters." })
+        .min(1, { message: "Category is required." })
+        .max(30, { message: "Category cannot exceed 30 characters." })
     )
-    .min(1, { message: "At least one tag is required." })
+    .min(1, { message: "At least one category is required." })
     .max(3, { message: "Cannot add more than 3 categories." }),
 
   stock: z.number().min(0, { message: "Please enter stock." }),

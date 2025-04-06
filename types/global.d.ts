@@ -1,3 +1,5 @@
+import { ProductChanges } from "@/database/models/product-history.model";
+
 interface Category {
   _id: string;
   name: string;
@@ -9,17 +11,6 @@ interface Author {
   image: string;
 }
 
-interface Product {
-  _id: string;
-  brand: string;
-  title: string;
-  description: string;
-  categories: Category[];
-  createdAt: Date;
-  stock: number;
-  code: string;
-}
-
 interface User {
   _id: string;
   name: string;
@@ -29,6 +20,29 @@ interface User {
   address?: string;
   contactNumber?: number;
   role: string;
+}
+
+interface Product {
+  _id: string;
+  brand: string;
+  title: string;
+  description: string;
+  categories: Category[];
+  createdAt: Date;
+  stock: number;
+  code: string;
+  creator: User;
+}
+
+interface ProductHistory {
+  _id: string;
+  product: Product;
+  editor: User;
+  changes: ProductChanges;
+  categoriesAdded?: Category[];
+  categoriesRemoved?: Category[];
+  remark?: string;
+  editedAt: Date;
 }
 
 type ActionResponse<T = null> = {

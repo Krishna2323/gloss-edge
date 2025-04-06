@@ -1,4 +1,5 @@
 import { techMap } from "@/constants/techMap";
+import { UserRole } from "@/types/nextauth";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -34,4 +35,12 @@ export const getTimeStamp = (createdAt: Date) => {
     }
   }
   return "just now";
+};
+
+export const isAdmin = (role?: UserRole | undefined | string) => {
+  return role === "admin";
+};
+
+export const isBusinessAccount = (role?: UserRole | undefined | string) => {
+  return role === "admin";
 };

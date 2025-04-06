@@ -34,6 +34,8 @@ import React from "react";
 import { updateUserRole } from "@/lib/actions/user.actions";
 import { toast } from "@/hooks/useToast";
 import { useRouter } from "next/navigation";
+import { isAdmin } from "@/lib/utils";
+import { User } from "@/types/global";
 
 const UsersTable = ({ data }: { data: User[] }) => {
   const router = useRouter();
@@ -121,9 +123,9 @@ const UsersTable = ({ data }: { data: User[] }) => {
         return (
           <Button
             type="submit"
-            className={`ml-auto size-8 w-max rounded border p-1 py-0 text-xs capitalize ${role === "admin" ? "border-none" : "border-slate-400"}`}
+            className={`ml-auto size-8 w-max rounded border p-1 py-0 text-xs capitalize ${isAdmin(role) ? "border-none" : "border-slate-400"}`}
             variant="ghost"
-            disabled={role === "admin"}
+            disabled={isAdmin(role)}
             onClick={() => updateUser(id, role)}
           >
             {updateToRole}

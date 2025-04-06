@@ -7,6 +7,7 @@ import { auth } from "@/auth";
 
 import { UnauthorizedError, ValidationError } from "../http-errors";
 import dbConnect from "../mongoose";
+import { isAdmin } from "../utils";
 
 type ActionOptions<T> = {
   params?: T;
@@ -53,13 +54,13 @@ async function action<T>({
     if (
       isBusinessAction &&
       session.user.role !== "business" &&
-      session.user.role !== "admin"
+      !isAdmin(session?.user.role)
     ) {
       return new UnauthorizedError(
         "Only business acccounts can see this data!"
       );
     }
-    if (isAdminAction && session.user.role !== "admin") {
+    if (isAdminAction && !isAdmin(session?.user.role)) {
       return new UnauthorizedError();
     }
   }

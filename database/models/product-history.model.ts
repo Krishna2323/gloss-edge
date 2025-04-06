@@ -14,7 +14,7 @@ export interface ProductChanges {
 }
 
 export interface IProductHistory {
-  productId: Types.ObjectId;
+  product: Types.ObjectId;
   editor: Types.ObjectId;
   changes: ProductChanges;
   categoriesAdded?: Types.ObjectId[];
@@ -27,7 +27,7 @@ export interface IProductHistoryDoc extends IProductHistory, Document {}
 
 const ProductHistorySchema = new Schema<IProductHistory>(
   {
-    productId: { type: Schema.Types.ObjectId, ref: "Product", required: true },
+    product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
     editor: { type: Schema.Types.ObjectId, ref: "User", required: true },
     changes: { type: Map, of: Object, required: true }, // Ensures structured data
     categoriesAdded: [{ type: Schema.Types.ObjectId, ref: "Category" }],

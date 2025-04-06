@@ -15,6 +15,14 @@ import Category, { ICategoryDoc } from "@/database/models/category.model";
 import ProductHistory, {
   ProductChanges,
 } from "@/database/models/product-history.model";
+import { isAdmin as isAdminUtil } from "../utils";
+import {
+  ActionResponse,
+  ErrorResponse,
+  PaginatedSearchParams,
+  Product as ProductInterface,
+  ProductHistory as ProductHistoryType,
+} from "@/types/global";
 
 export async function createProduct(
   params: CreateProductParams
@@ -211,7 +219,7 @@ export async function editProduct(
       await ProductHistory.create(
         [
           {
-            productId: productID,
+            product: productID,
             editor: userId,
             changes,
             categoriesAdded: newCategoryDocuments.map((c) => c.category),
@@ -243,7 +251,7 @@ export async function editProduct(
 
 export async function getProduct(
   params: GetProductParams
-): Promise<ActionResponse<Product>> {
+): Promise<ActionResponse<ProductInterface>> {
   const validationResult = await action({
     params,
     schema: GetProductSchema,
@@ -271,7 +279,7 @@ export async function getProduct(
 
 export async function getProducts(params: PaginatedSearchParams): Promise<
   ActionResponse<{
-    products: Product[];
+    products: ProductInterface[];
     isNext: boolean;
     totalProducts: number;
   }>
@@ -308,7 +316,7 @@ export async function getProducts(params: PaginatedSearchParams): Promise<
     ];
   }
 
-  const isAdmin = validationResult.session?.user.role === "admin";
+  const isAdmin = isAdminUtil(validationResult.session?.user.role);
 
   let sortCriteria: Record<string, 1 | -1> = {
     ...(isAdmin ? { stock: 1 } : {}),
@@ -347,6 +355,37 @@ export async function getProducts(params: PaginatedSearchParams): Promise<
         isNext,
         totalProducts,
       },
+    };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
+
+export async function getProductsHistory(): Promise<
+  ActionResponse<{ productHistories: ProductHistoryType[] }>
+> {
+  const validationResult = await action({
+    isAdminAction: true,
+    authorize: true,
+  });
+
+  if (validationResult instanceof Error) {
+    return handleError(validationResult) as ErrorResponse;
+  }
+
+  try {
+    const productHistories = await ProductHistory.find()
+      .sort({
+        createdAt: -1,
+      })
+      .populate("categoriesAdded")
+      .populate("product")
+      .populate("categoriesRemoved")
+      .limit(50);
+
+    return {
+      success: true,
+      data: { productHistories: JSON.parse(JSON.stringify(productHistories)) },
     };
   } catch (error) {
     return handleError(error) as ErrorResponse;

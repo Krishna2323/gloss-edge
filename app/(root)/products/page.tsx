@@ -8,6 +8,8 @@ import { PRODUCTS_PER_PAGE } from "@/constants";
 import { getProducts } from "@/lib/actions/product.actions";
 import React, { Suspense } from "react";
 import { ProductsLoading } from "./loading";
+import { isAdmin } from "@/lib/utils";
+import Heading from "@/components/Heading";
 
 interface SearchParams {
   searchParams: Promise<{ [key: string]: string }>;
@@ -17,7 +19,10 @@ const page = async ({ searchParams }: SearchParams) => {
   const { page = 1, pageSize, query, filter } = await searchParams;
   const session = await auth();
 
-  if (!session?.user.role || session.user.role === "user") {
+  if (
+    (!session?.user.role || session.user.role === "user") &&
+    !isAdmin(session?.user.role)
+  ) {
     return <InfoText text="Only business accounts can see the inventory." />;
   }
   const { data } = await getProducts({
@@ -31,17 +36,13 @@ const page = async ({ searchParams }: SearchParams) => {
 
   return (
     <>
-      <section className="flex w-full flex-col-reverse justify-between gap-2 sm:flex-row sm:items-center">
-        <h1 className="h2-bold text-dark100_light900">All Products </h1>
-      </section>
-      <section className="mt-4">
-        <LocalSearch
-          route="/"
-          imgSrc="/icons/search_coloured.svg"
-          placeholder="Search products..."
-          otherClasses="flex-1"
-        />
-      </section>
+      <Heading text="All Products " />
+      <LocalSearch
+        route="/"
+        imgSrc="/icons/search_coloured.svg"
+        placeholder="Search products..."
+        otherClasses="flex-1"
+      />
       <HomeFilter />
       <Suspense fallback={<ProductsLoading />}>
         <h3 className="text-dark100_light900 mt-6 p-2 text-lg">

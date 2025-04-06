@@ -2,16 +2,13 @@ import { auth } from "@/auth";
 import UsersTable from "@/components/admin/UsersTable";
 import InfoText from "@/components/auth/InfoText";
 import { getUsers } from "@/lib/actions/user.actions";
+import { isAdmin } from "@/lib/utils";
 
 const page = async () => {
   const session = await auth();
 
-  if (
-    !session?.user.role ||
-    session.user.role === "user" ||
-    session.user.role === "business"
-  ) {
-    return <InfoText text="Only business accounts can see the inventory." />;
+  if (!session?.user.role || !isAdmin(session?.user.role)) {
+    return <InfoText text="Only admin accounts can see the inventory." />;
   }
 
   const { data } = await getUsers();

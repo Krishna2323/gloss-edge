@@ -3,11 +3,12 @@ import Navbar from "@/components/navigation/navbar";
 import AdminLeftSidebar from "@/components/navigation/AdminLeftSidebar";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { isAdmin } from "@/lib/utils";
 
 const RootLayout = async ({ children }: { children: ReactNode }) => {
   const session = await auth();
 
-  if (session?.user.role !== "admin") {
+  if (!isAdmin(session?.user.role)) {
     redirect("/");
   }
 
