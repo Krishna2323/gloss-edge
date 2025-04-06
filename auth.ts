@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import { IUserDoc } from "./database/models/user.model";
 import { SignInSchema } from "./lib/validations";
 import { UserRole } from "./types/nextauth";
+import { ActionResponse } from "./types/global";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [

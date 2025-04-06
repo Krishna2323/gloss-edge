@@ -3,9 +3,11 @@
 import { User } from "@/database";
 import action from "../handlers/action";
 import handleError from "../handlers/error";
+import { ActionResponse, ErrorResponse } from "@/types/global";
+import { User as UserInterface } from "next-auth";
 
 export async function getUsers(): Promise<
-  ActionResponse<{ users: User[]; totalUsers: number }>
+  ActionResponse<{ users: UserInterface[]; totalUsers: number }>
 > {
   const validationResult = await action({
     isAdminAction: true,
