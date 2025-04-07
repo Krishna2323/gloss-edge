@@ -21,6 +21,7 @@ import { createProduct, editProduct } from "@/lib/actions/product.actions";
 import { useToast } from "@/hooks/useToast";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { redirect } from "next/navigation";
+import { Product } from "@/types/global";
 
 interface Props {
   product?: Product;

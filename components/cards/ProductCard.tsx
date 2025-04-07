@@ -6,6 +6,7 @@ import CategoryCard from "./CategoryCard";
 import { ADMIN_ROUTES, ROUTES } from "@/constants/routes";
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/utils";
+import { Product } from "@/types/global";
 
 interface Props {
   question: Product;
