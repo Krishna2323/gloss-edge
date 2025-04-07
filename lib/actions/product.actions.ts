@@ -381,7 +381,7 @@ export async function getProductsHistory(): Promise<
       .populate("categoriesAdded")
       .populate("product")
       .populate("categoriesRemoved")
-      .limit(50);
+      .limit(100);
 
     return {
       success: true,
