@@ -23,6 +23,7 @@ import { Button } from "../ui/button";
 import { useToast } from "@/hooks/useToast";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
+import { ActionResponse } from "@/types/global";
 
 interface AuthFormProps<T extends FieldValues> {
   schema: ZodType<T>;
