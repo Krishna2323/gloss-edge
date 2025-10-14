@@ -17,10 +17,23 @@ import { Input } from "@/components/ui/input";
 import { ProductSchema } from "@/lib/validations";
 import CategoryCard from "@/components/cards/CategoryCard";
 import { z } from "zod";
-import { createProduct, editProduct } from "@/lib/actions/product.actions";
+import {
+  createProduct,
+  editProduct,
+  deleteProduct,
+} from "@/lib/actions/product.actions";
 import { useToast } from "@/hooks/useToast";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { redirect } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Product } from "@/types/global";
 
 interface Props {
@@ -138,6 +151,26 @@ const AddEditProductDialog = ({ isEditAction, product }: Props) => {
     });
   };
 
+  const handleDelete = async () => {
+    if (!product?._id) return;
+    startTransition(async () => {
+      const result = await deleteProduct({ productID: product._id });
+      if (result.success) {
+        toast({
+          title: "Deleted",
+          description: "Product deleted successfully",
+        });
+        redirect("/admin/products");
+      } else {
+        toast({
+          type: "error",
+          title: `Error ${result.status}`,
+          description: result.error?.message || "Failed to delete product",
+        });
+      }
+    });
+  };
+
   return (
     <Form {...form}>
       <h2 className="h2-semibold text-dark100_light900 mb-6">
@@ -226,18 +259,67 @@ const AddEditProductDialog = ({ isEditAction, product }: Props) => {
             </FormItem>
           )}
         />
-        <Button
-          disabled={form.formState.isSubmitting ?? isPending}
-          className="primary-gradient paragraph-medium min-h-12 w-full rounded-2 px-4 py-3 font-inter !text-light-900"
-        >
-          {isPending ? (
-            <>
-              <ReloadIcon className="mr-2 animate-spin" /> Creating...
-            </>
-          ) : (
-            "Confirm"
+        <div className="flex gap-3">
+          <Button
+            disabled={form.formState.isSubmitting ?? isPending}
+            className="primary-gradient paragraph-medium min-h-12 w-full rounded-2 px-4 py-3 font-inter !text-light-900"
+            type="submit"
+          >
+            {isPending ? (
+              <>
+                <ReloadIcon className="mr-2 animate-spin" />
+                {isEditAction ? "Saving..." : "Creating..."}
+              </>
+            ) : (
+              "Confirm"
+            )}
+          </Button>
+
+          {isEditAction && product?._id && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  type="button"
+                  className="danger-gradient paragraph-medium min-h-12 w-[180px] rounded-2 px-4 py-3 font-inter !text-light-900"
+                >
+                  Delete
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="background-light900_dark300 text-dark300_light700 light-border-2">
+                <DialogHeader>
+                  <DialogTitle>Delete product?</DialogTitle>
+                  <DialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    the product and remove its associations.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    disabled={isPending}
+                    className="secondary-gradient paragraph-medium min-h-12 rounded-2 px-4 py-3 font-inter !text-light-900"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={isPending}
+                    className="danger-gradient paragraph-medium min-h-12 rounded-2 px-4 py-3 font-inter !text-light-900"
+                  >
+                    {isPending ? (
+                      <>
+                        <ReloadIcon className="mr-2 animate-spin" /> Deleting...
+                      </>
+                    ) : (
+                      "Delete"
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           )}
-        </Button>
+        </div>
       </form>
     </Form>
   );

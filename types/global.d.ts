@@ -43,6 +43,8 @@ interface ProductHistory {
   categoriesRemoved?: Category[];
   remark?: string;
   editedAt: Date;
+  deletedTitle?: string;
+  deletedStock?: number;
 }
 
 type ActionResponse<T = null> = {

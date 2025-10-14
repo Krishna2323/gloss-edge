@@ -13,14 +13,14 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -31,14 +31,14 @@ import {
 } from "@/components/ui/table";
 
 import React from "react";
-import { updateUserRole } from "@/lib/actions/user.actions";
-import { toast } from "@/hooks/useToast";
-import { useRouter } from "next/navigation";
-import { isAdmin } from "@/lib/utils";
+// import { updateUserRole } from "@/lib/actions/user.actions";
+// import { toast } from "@/hooks/useToast";
+// import { useRouter } from "next/navigation";
+// import { isAdmin } from "@/lib/utils";
 import { ProductHistory } from "@/types/global";
 
 const ProductsHistoryTable = ({ data }: { data: ProductHistory[] }) => {
-  const router = useRouter();
+  // const router = useRouter();
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -48,34 +48,29 @@ const ProductsHistoryTable = ({ data }: { data: ProductHistory[] }) => {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  const updateUser = async (id: string, role: string) => {
-    const result = await updateUserRole(id, role);
-
-    if (result.success) {
-      toast({
-        title: "Success",
-        description: "User role updated successfully!",
-      });
-      router.refresh();
-    } else {
-      toast({
-        title: `Error ${result?.status}`,
-        description: result?.error?.message,
-        type: "error",
-      });
-    }
-  };
+  // const updateUser = async (id: string, role: string) => {
+  //   const result = await updateUserRole(id, role);
+  //   if (result.success) {
+  //     toast({ title: "Success", description: "User role updated successfully!" });
+  //     router.refresh();
+  //   } else {
+  //     toast({ title: `Error ${result?.status}`, description: result?.error?.message, type: "error" });
+  //   }
+  // };
 
   const columns: ColumnDef<ProductHistory>[] = [
     {
       accessorKey: "product.title",
       header: "Product",
-      cell: ({ row }) => (
-        <div className="capitalize">
-          {row.original.product?.title + ` (${row.original.product?.code})` ||
-            "N/A"}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const product = row.original.product;
+        const deletedTitle = row.original.deletedTitle;
+        const codeSuffix = product?.code ? ` (${product.code})` : "";
+        const label = product?.title
+          ? product.title + codeSuffix
+          : deletedTitle || "N/A";
+        return <div className="capitalize">{label}</div>;
+      },
     },
     // {
     //   accessorKey: "editor",
@@ -138,11 +133,23 @@ const ProductsHistoryTable = ({ data }: { data: ProductHistory[] }) => {
     {
       accessorKey: "remark",
       header: "Remark",
-      cell: ({ row }) => (
-        <div className="max-w-48 overflow-hidden truncate">
-          {row.original.remark || "N/A"}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const remark = row.original.remark || "";
+        const deletedStock =
+          typeof row.original.deletedStock === "number"
+            ? ` | Stock at deletion: ${row.original.deletedStock}`
+            : "";
+        const removedCats = (row.original.categoriesRemoved || [])
+          .map((c) => c.name)
+          .join(", ");
+        const removedCatsSuffix = removedCats
+          ? ` | Categories: ${removedCats}`
+          : "";
+        const text =
+          (remark || "").concat(deletedStock).concat(removedCatsSuffix) ||
+          "N/A";
+        return <div className="max-w-72 overflow-hidden truncate">{text}</div>;
+      },
     },
     {
       accessorKey: "editedAt",

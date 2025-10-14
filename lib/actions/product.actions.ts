@@ -391,3 +391,99 @@ export async function getProductsHistory(): Promise<
     return handleError(error) as ErrorResponse;
   }
 }
+
+export async function deleteProduct(params: {
+  productID: string;
+  remark?: string; // optional: add a reason for deletion to history
+}): Promise<ActionResponse<null>> {
+  const validationResult = await action({
+    params,
+    schema: GetProductSchema, // still validates productID
+    authorize: true,
+    isAdminAction: true,
+  });
+
+  if (validationResult instanceof Error) {
+    return handleError(validationResult) as ErrorResponse;
+  }
+
+  const { productID } = validationResult.params!;
+  const remark = (params as { remark?: string })?.remark ?? "Product deleted";
+  const editor = validationResult?.session?.user?.id;
+
+  const session = await mongoose.startSession();
+  try {
+    await session.withTransaction(async () => {
+      // Read under the same session for consistency
+      const product = await Product.findById(productID)
+        .select("categories title stock")
+        .session(session);
+
+      if (!product) {
+        throw new Error("Product not found");
+      }
+
+      // Normalize category ids (handle possible mixed types)
+      const categoryIdsRaw = (product.categories || []) as Array<
+        mongoose.Types.ObjectId | { _id: mongoose.Types.ObjectId }
+      >;
+
+      const categoryIdStrings = Array.from(
+        new Set(
+          categoryIdsRaw.map((c) => {
+            const id = (c as { _id: mongoose.Types.ObjectId })?._id ?? c;
+            return id.toString();
+          })
+        )
+      );
+
+      const categoryIds = categoryIdStrings.map(
+        (id) => new mongoose.Types.ObjectId(id)
+      );
+
+      // 1) Remove category-product join rows first
+      if (categoryIds.length > 0) {
+        await CategoryProduct.deleteMany(
+          { product: productID, category: { $in: categoryIds } },
+          { session }
+        );
+      }
+
+      // 2) Decrement category counters (simple $inc; assumes consistency)
+      if (categoryIds.length > 0) {
+        await Category.updateMany(
+          { _id: { $in: categoryIds } },
+          { $inc: { products: -1 } },
+          { session }
+        );
+        // If you want to guard against negatives, swap the above with a pipeline update.
+      }
+
+      // 3) Delete the product itself
+      await Product.findByIdAndDelete(productID, { session });
+
+      // 4) Log in history with snapshot fields for UI after deletion
+      await ProductHistory.create(
+        [
+          {
+            product: productID,
+            editor,
+            changes: {}, // nothing to diff on deletion; entry exists for audit trail
+            categoriesAdded: [],
+            categoriesRemoved: categoryIds,
+            remark,
+            deletedTitle: product.title,
+            deletedStock: product.stock,
+          },
+        ],
+        { session }
+      );
+    });
+
+    return { success: true };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  } finally {
+    await session.endSession();
+  }
+}

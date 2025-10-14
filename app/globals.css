@@ -219,6 +219,14 @@ body {
     background: linear-gradient(129deg, #ff7000 0%, #e2995f 100%);
   }
 
+  .danger-gradient {
+    background: linear-gradient(129deg, #ef4444 0%, #dc2626 100%);
+  }
+
+  .secondary-gradient {
+    background: linear-gradient(129deg, #94a3b8 0%, #64748b 100%);
+  }
+
   .dark-gradient {
     background: linear-gradient(
       232deg,

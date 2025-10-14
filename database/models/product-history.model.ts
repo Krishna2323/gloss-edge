@@ -21,6 +21,8 @@ export interface IProductHistory {
   categoriesRemoved?: Types.ObjectId[];
   remark?: string;
   editedAt: Date;
+  deletedTitle?: string;
+  deletedStock?: number;
 }
 
 export interface IProductHistoryDoc extends IProductHistory, Document {}
@@ -34,6 +36,8 @@ const ProductHistorySchema = new Schema<IProductHistory>(
     categoriesRemoved: [{ type: Schema.Types.ObjectId, ref: "Category" }],
     editedAt: { type: Date, default: Date.now },
     remark: { type: String },
+    deletedTitle: { type: String },
+    deletedStock: { type: Number },
   },
   { timestamps: true }
 );
