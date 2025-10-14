@@ -156,3 +156,10 @@ export const PaginatedSearchParamsSchema = z.object({
   filter: z.string().optional(),
   sort: z.string().optional(),
 });
+
+export const ProductHistoryParamsSchema = z.object({
+  page: z.number().int().positive().default(1),
+  pageSize: z.number().int().positive().default(20),
+  from: z.string().datetime().optional(), // ISO string
+  to: z.string().datetime().optional(), // ISO string
+});

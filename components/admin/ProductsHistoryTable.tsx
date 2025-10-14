@@ -31,15 +31,10 @@ import {
 } from "@/components/ui/table";
 
 import React from "react";
-// import { updateUserRole } from "@/lib/actions/user.actions";
-// import { toast } from "@/hooks/useToast";
-// import { useRouter } from "next/navigation";
-// import { isAdmin } from "@/lib/utils";
+
 import { ProductHistory } from "@/types/global";
 
 const ProductsHistoryTable = ({ data }: { data: ProductHistory[] }) => {
-  // const router = useRouter();
-
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -47,16 +42,6 @@ const ProductsHistoryTable = ({ data }: { data: ProductHistory[] }) => {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-
-  // const updateUser = async (id: string, role: string) => {
-  //   const result = await updateUserRole(id, role);
-  //   if (result.success) {
-  //     toast({ title: "Success", description: "User role updated successfully!" });
-  //     router.refresh();
-  //   } else {
-  //     toast({ title: `Error ${result?.status}`, description: result?.error?.message, type: "error" });
-  //   }
-  // };
 
   const columns: ColumnDef<ProductHistory>[] = [
     {
@@ -171,6 +156,11 @@ const ProductsHistoryTable = ({ data }: { data: ProductHistory[] }) => {
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    initialState: {
+      pagination: {
+        pageSize: 20,
+      },
+    },
     state: {
       sorting,
       columnFilters,
@@ -267,7 +257,7 @@ const ProductsHistoryTable = ({ data }: { data: ProductHistory[] }) => {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      {/* <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
@@ -290,7 +280,7 @@ const ProductsHistoryTable = ({ data }: { data: ProductHistory[] }) => {
             Next
           </Button>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
