@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ROUTES } from "@/constants/routes";
 import type { ProductMovement } from "@/lib/actions/stock.actions";
 import { cn, formatWhen } from "@/lib/utils";
 
@@ -33,13 +35,19 @@ const MovementList = ({ movements }: { movements: ProductMovement[] }) => {
           .join(" · ");
         const isTransfer = m.type === "transfer";
 
-        return (
-          <li
-            key={m._id}
-            className="flex items-center justify-between gap-3.5 border-b border-white/5 px-[18px] py-4 last:border-b-0"
-          >
+        const rowClass =
+          "flex items-center justify-between gap-3.5 px-[18px] py-4";
+        const content = (
+          <>
             <div className="flex min-w-0 flex-col gap-[5px]">
-              <span className="truncate text-sm font-semibold">{title(m)}</span>
+              <span className="truncate text-sm font-semibold">
+                {m.product && (
+                  <span className="font-wide font-extrabold">
+                    {m.product.code}{" "}
+                  </span>
+                )}
+                {title(m)}
+              </span>
               <span className="truncate text-xs text-fg-muted">{detail}</span>
             </div>
             <span
@@ -56,6 +64,21 @@ const MovementList = ({ movements }: { movements: ProductMovement[] }) => {
                 ? m.change.toString().replace("-", "−")
                 : `+${m.change}`}
             </span>
+          </>
+        );
+
+        return (
+          <li key={m._id} className="border-b border-white/5 last:border-b-0">
+            {m.product ? (
+              <Link
+                href={ROUTES.PRODUCT(m.product._id)}
+                className={cn(rowClass, "active:bg-white/[0.03]")}
+              >
+                {content}
+              </Link>
+            ) : (
+              <div className={rowClass}>{content}</div>
+            )}
           </li>
         );
       })}

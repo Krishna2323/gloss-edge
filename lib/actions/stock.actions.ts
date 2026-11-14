@@ -11,7 +11,7 @@ import {
 } from "../validations";
 import { applyStockChange, moveStockBetweenCities } from "../stock";
 import { canSeeCityStock, escapeRegex, isAdmin } from "../utils";
-import { NotFoundError } from "../http-errors";
+import { ForbiddenError, NotFoundError } from "../http-errors";
 import Location from "@/database/models/location.model";
 import Product from "@/database/models/product.model";
 import StockLevel from "@/database/models/stock-level.model";
@@ -302,6 +302,7 @@ export type ProductMovement = {
   note?: string;
   user?: string;
   at: string;
+  product?: { _id: string; code: string };
 };
 
 export type ProductDetail = {
@@ -331,6 +332,7 @@ type MovementDoc = {
   transferId?: mongoose.Types.ObjectId;
   location?: { name: string };
   user?: { name: string };
+  product?: { _id: mongoose.Types.ObjectId; code: string };
   createdAt: Date;
 };
 
@@ -420,6 +422,37 @@ export async function getProductDetail(
   }
 }
 
+export async function getRecentMovements(): Promise<
+  ActionResponse<ProductMovement[]>
+> {
+  const validationResult = await action({ authorize: true });
+
+  if (validationResult instanceof Error) {
+    return handleError(validationResult) as ErrorResponse;
+  }
+
+  try {
+    if (!canSeeCityStock(validationResult.session?.user.role)) {
+      throw new ForbiddenError();
+    }
+
+    const docs = await StockMovement.find({ type: { $ne: "opening" } })
+      .populate("product", "code")
+      .populate("location", "name")
+      .populate("user", "name")
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(16)
+      .lean<MovementDoc[]>();
+
+    return {
+      success: true,
+      data: JSON.parse(JSON.stringify(groupTransfers(docs).slice(0, 8))),
+    };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
+
 function groupTransfers(docs: MovementDoc[]): ProductMovement[] {
   const result: ProductMovement[] = [];
   const transfers = new Map<string, ProductMovement>();
@@ -433,6 +466,9 @@ function groupTransfers(docs: MovementDoc[]): ProductMovement[] {
       note: doc.note,
       user: doc.user?.name,
       at: new Date(doc.createdAt).toISOString(),
+      product: doc.product?.code
+        ? { _id: doc.product._id.toString(), code: doc.product.code }
+        : undefined,
     };
 
     if (doc.type !== "transfer" || !doc.transferId) {

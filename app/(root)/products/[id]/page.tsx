@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import InfoText from "@/components/auth/InfoText";
 import CityStockList from "@/components/stock/CityStockList";
 import MovementList from "@/components/stock/MovementList";
+import SectionHeading from "@/components/stock/SectionHeading";
 import StatTiles from "@/components/stock/StatTiles";
 import StockActions from "@/components/stock/StockActions";
 import { getProductDetail } from "@/lib/actions/stock.actions";
@@ -12,12 +13,6 @@ import { canSeeInventory, cn } from "@/lib/utils";
 import { RouteParams } from "@/types/global";
 
 const statusText = { ok: "IN STOCK", low: "LOW", out: "OUT OF STOCK" };
-
-const SectionHeading = ({ children }: { children: string }) => (
-  <h2 className="font-wide px-6 pb-3.5 pt-10 text-base font-black uppercase">
-    {children}
-  </h2>
-);
 
 const ProductDetailPage = async ({ params }: RouteParams) => {
   const session = await auth();

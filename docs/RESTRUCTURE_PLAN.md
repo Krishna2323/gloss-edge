@@ -77,7 +77,8 @@ Migration (tested on the local copy first, fresh backup before running on prod):
       Tested end to end in a browser on the local copy, for admin, staff and business
 - [x] Cities screen at `/cities`: add, rename, deactivate (only when empty), reactivate.
       Names unique ignoring case. Cities in the admin nav, Users in the account sheet
-- [ ] Home dashboard
+- [x] Home dashboard: units, low and out tiles that open the filtered list, stock by city,
+      running low list and latest movements. Business sees tiles only
 - [ ] Add and edit product in the new style. Starting stock goes into a chosen city,
       and the form stops editing `products.stock` directly
 - [ ] History and users pages in the new style
