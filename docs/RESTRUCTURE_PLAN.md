@@ -56,7 +56,8 @@ Progress:
       10 parallel removals never oversell
 - [ ] Screens must stop editing `products.stock` directly (the product form still does).
       New products put their starting stock into a chosen city through `applyStockChange`
-- [ ] Role checks for `staff` (stock actions are admin only for now)
+- [x] Role checks: `staff` sees inventory and per-city stock, `business` sees totals only.
+      Stock changes stay admin only
 
 Migration (tested on the local copy first, fresh backup before running on prod):
 
@@ -68,8 +69,11 @@ Migration (tested on the local copy first, fresh backup before running on prod):
 
 ## Phase 3: Redesign
 
-- New theme and layout (drop the devflow look)
-- Products data table with search, filters (city, brand, category, stock status)
+- [x] Foundation: Archivo, dark only, gold accent, tokens, raised and gold buttons,
+      bottom nav by role, account sheet
+- [x] Products screen: search, city picker, low and out filters, per-city bars, pagination.
+      Checked at phone and desktop width, admin and business roles
+- [ ] Product detail screen (rows link to `/products/[id]`, still a stub)
 - Stock adjust sheet (in, out, transfer) with remark
 - Product detail page with per-city stock and movement history
 - Dashboard: stock by city, out-of-stock and low-stock lists, recent movements

@@ -31,6 +31,27 @@ const config: Config = {
           "850": "#FDFDFD",
           "900": "#FFFFFF",
         },
+        ink: {
+          "950": "#070708",
+          "900": "#0E0E10",
+          "850": "#121214",
+          "800": "#1D1D20",
+          "700": "#27272A",
+          "600": "#3A3A3F",
+        },
+        fg: {
+          DEFAULT: "#F5F5F4",
+          muted: "#A3A3A3",
+          faint: "#8A8A8A",
+        },
+        gold: {
+          DEFAULT: "#F5C451",
+          light: "#FFD97A",
+          deep: "#E9B13C",
+          ink: "#1A1306",
+        },
+        low: "#FF9F43",
+        out: "#FF5A6A",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -75,6 +96,13 @@ const config: Config = {
         "light-300": "-10px 10px 20px 0px rgba(218, 213, 213, 0.10)",
         "dark-100": "0px 2px 10px 0px rgba(46, 52, 56, 0.10)",
         "dark-200": "2px 0px 20px 0px rgba(39, 36, 36, 0.04)",
+        raised:
+          "inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 8px 18px rgba(0, 0, 0, 0.6)",
+        well: "inset 0 2px 6px rgba(0, 0, 0, 0.7)",
+        "gold-glow":
+          "inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 8px 20px rgba(245, 196, 81, 0.35)",
+        float:
+          "inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 16px 30px rgba(0, 0, 0, 0.8)",
       },
       screens: {
         xs: "420px",
@@ -82,6 +110,7 @@ const config: Config = {
       fontFamily: {
         inter: ["var(--font-inter)"],
         "space-grotesk": ["var(--font-space-grotesk)"],
+        archivo: ["var(--font-archivo)", "system-ui", "sans-serif"],
       },
       borderRadius: {
         "2": "8px",
@@ -92,6 +121,10 @@ const config: Config = {
       },
       backgroundImage: {
         auth: 'url("/images/auth-bg.jpg")',
+        raised: "linear-gradient(180deg, #232326, #131315)",
+        tile: "linear-gradient(180deg, #1D1D20, #121214)",
+        "gold-btn": "linear-gradient(180deg, #FFD97A, #E9B13C)",
+        "gold-chip": "linear-gradient(180deg, #2A2418, #17140E)",
       },
     },
   },

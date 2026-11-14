@@ -200,3 +200,15 @@ export const TransferStockSchema = z
     message: "Pick two different cities.",
     path: ["toLocationID"],
   });
+
+export const StockOverviewSchema = z.object({
+  page: z.number().int().positive().default(1),
+  pageSize: z.number().int().positive().max(100).default(20),
+  query: z.string().max(100).optional(),
+  filter: z.enum(["", "low", "out"]).optional(),
+  city: z
+    .string()
+    .regex(/^[a-f0-9]{24}$/, { message: "Unknown city." })
+    .optional()
+    .or(z.literal("")),
+});

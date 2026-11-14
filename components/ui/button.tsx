@@ -19,12 +19,17 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        raised:
+          "rounded-2xl border border-white/[0.08] bg-raised font-archivo font-semibold text-fg shadow-raised active:translate-y-px",
+        gold: "rounded-2xl bg-gold-btn font-archivo font-extrabold text-gold-ink shadow-gold-glow active:translate-y-px",
       },
       size: {
         default: "h-9 px-4 py-2",
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 rounded-md px-8",
         icon: "size-9",
+        tap: "h-14 px-5 text-[15px] [&_svg]:size-5",
+        "tap-icon": "size-11 [&_svg]:size-5",
       },
     },
     defaultVariants: {

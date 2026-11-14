@@ -40,3 +40,12 @@ export const removeKeysFromUrlQuery = ({
     { skipNull: true }
   );
 };
+
+export const buildHref = (
+  pathname: string,
+  query: Record<string, string | number | undefined>
+) =>
+  qs.stringifyUrl(
+    { url: pathname, query },
+    { skipNull: true, skipEmptyString: true }
+  );

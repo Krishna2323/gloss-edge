@@ -41,6 +41,15 @@ export const isAdmin = (role?: UserRole | undefined | string) => {
   return role === "admin";
 };
 
+export const canSeeInventory = (role?: UserRole | string) =>
+  role === "business" || role === "staff" || role === "admin";
+
+export const canSeeCityStock = (role?: UserRole | string) =>
+  role === "staff" || role === "admin";
+
+export const escapeRegex = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 export const isBusinessAccount = (role?: UserRole | undefined | string) => {
   return role === "admin";
 };
