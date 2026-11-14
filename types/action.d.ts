@@ -34,3 +34,20 @@ interface EditProductParams extends CreateProductParams {
 interface GetProductParams {
   productID: string;
 }
+
+interface AdjustStockParams {
+  productID: string;
+  locationID: string;
+  type: "in" | "out" | "correction";
+  change: number;
+  reason?: string;
+  note?: string;
+}
+
+interface TransferStockParams {
+  productID: string;
+  fromLocationID: string;
+  toLocationID: string;
+  quantity: number;
+  note?: string;
+}

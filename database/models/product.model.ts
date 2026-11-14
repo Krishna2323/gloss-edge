@@ -8,6 +8,8 @@ export interface IProduct {
   categories: Types.ObjectId[];
   code: string;
   creator: Types.ObjectId;
+  color?: string;
+  lowStockAt?: number;
 }
 
 export interface IProductDoc extends IProduct, Document {}
@@ -20,6 +22,8 @@ const ProductSchema = new Schema<IProduct>(
     categories: [{ type: Schema.Types.ObjectId, ref: "Category" }],
     code: { type: String, required: true },
     creator: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    color: { type: String, match: /^#[0-9a-fA-F]{6}$/ },
+    lowStockAt: { type: Number, min: 0 },
   },
   { timestamps: true }
 );

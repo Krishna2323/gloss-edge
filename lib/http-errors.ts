@@ -59,3 +59,10 @@ export class UnauthorizedError extends RequestError {
     this.name = "UnauthorizedError";
   }
 }
+
+export class InsufficientStockError extends RequestError {
+  constructor(available: number) {
+    super(409, `Only ${available} in stock at this city`);
+    this.name = "InsufficientStockError";
+  }
+}

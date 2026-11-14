@@ -163,3 +163,40 @@ export const ProductHistoryParamsSchema = z.object({
   from: z.string().datetime().optional(), // ISO string
   to: z.string().datetime().optional(), // ISO string
 });
+
+export const AdjustStockSchema = z
+  .object({
+    productID: z.string().min(1, { message: "Product is required." }),
+    locationID: z.string().min(1, { message: "City is required." }),
+    type: z.enum(["in", "out", "correction"]),
+    change: z
+      .number()
+      .int({ message: "Quantity must be a whole number." })
+      .refine((n) => n !== 0, { message: "Quantity cannot be zero." }),
+    reason: z.string().max(50).optional(),
+    note: z.string().max(200).optional(),
+  })
+  .refine((v) => v.type !== "in" || v.change > 0, {
+    message: "Stock in must add stock.",
+    path: ["change"],
+  })
+  .refine((v) => v.type !== "out" || v.change < 0, {
+    message: "Stock out must remove stock.",
+    path: ["change"],
+  });
+
+export const TransferStockSchema = z
+  .object({
+    productID: z.string().min(1, { message: "Product is required." }),
+    fromLocationID: z.string().min(1, { message: "From city is required." }),
+    toLocationID: z.string().min(1, { message: "To city is required." }),
+    quantity: z
+      .number()
+      .int({ message: "Quantity must be a whole number." })
+      .positive({ message: "Quantity must be more than zero." }),
+    note: z.string().max(200).optional(),
+  })
+  .refine((v) => v.fromLocationID !== v.toLocationID, {
+    message: "Pick two different cities.",
+    path: ["toLocationID"],
+  });

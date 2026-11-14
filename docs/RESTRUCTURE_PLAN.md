@@ -28,12 +28,10 @@ Decided (2026-11-15):
 7. Visual direction approved: bold premium dark, dense lists with generous spacing,
    Archivo (wide for headings and numbers), one gold accent, per-city mini bar chart in rows
 
-Still open:
-
-- Name of the city that holds today's stock (the migration puts all current stock there)
-- Name of the second city
-- Employees: new `staff` role that sees per-city stock, or reuse `business`
-- Low-stock threshold: one default for all products with a per-product override?
+8. First city: Gorakhpur, Uttar Pradesh. All current stock moves there in the migration
+9. New `staff` role sees per-city stock. `business` customers keep seeing totals only
+10. Low stock: default 10, optional per-product override (`lowStockAt`)
+11. Optional per-product `color` with a neutral default. No image upload
 
 Mockups: https://claude.ai/artifact/9wEKqF9VWetkvrm7rynyia
 
@@ -47,6 +45,18 @@ Proposed data model, following the Shopify inventory level pattern
 - `stockmovements`: product, location, signed change, type
   (in, out, transfer, adjust), remark, user, time. Every stock change writes
   one row here and updates `stocklevels` in the same transaction
+
+Progress:
+
+- [x] Models: `locations`, `stocklevels`, `stockmovements`. Product gains optional `color`
+      and `lowStockAt`. User role gains `staff`
+- [x] `lib/stock.ts` (stock in, out, correction, transfer) and `lib/actions/stock.actions.ts`
+- [x] Migration `scripts/migrations/001-opening-stock-gorakhpur.ts`, verified on the local copy
+- [x] Tested locally: rejects overselling, rolls back on failure, ledger balances match,
+      10 parallel removals never oversell
+- [ ] Screens must stop editing `products.stock` directly (the product form still does).
+      New products put their starting stock into a chosen city through `applyStockChange`
+- [ ] Role checks for `staff` (stock actions are admin only for now)
 
 Migration (tested on the local copy first, fresh backup before running on prod):
 
