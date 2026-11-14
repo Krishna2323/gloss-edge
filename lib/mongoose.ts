@@ -8,6 +8,17 @@ if (!MONGODB_URI) {
   throw new Error("MONGODB_URI is not defined");
 }
 
+// Atlas holds the production data, so local runs must opt in explicitly.
+if (
+  process.env.NODE_ENV !== "production" &&
+  MONGODB_URI.includes("mongodb.net") &&
+  process.env.ALLOW_PROD_DB !== "true"
+) {
+  throw new Error(
+    "MONGODB_URI points at Atlas outside production. Set ALLOW_PROD_DB=true to allow it."
+  );
+}
+
 interface MongooseCache {
   conn: Mongoose | null;
   promise: Promise<Mongoose> | null;

@@ -1,13 +1,93 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credential from "next-auth/providers/credentials";
-import { IAccountDoc } from "./database/models/account.model";
-import { api } from "./lib/api";
+import mongoose from "mongoose";
+import slugify from "slugify";
 import bcrypt from "bcryptjs";
-import { IUserDoc } from "./database/models/user.model";
-import { SignInSchema } from "./lib/validations";
+import Account from "./database/models/account.model";
+import User from "./database/models/user.model";
+import dbConnect from "./lib/mongoose";
+import { SignInSchema, SignInWithOAuthSchema } from "./lib/validations";
 import { UserRole } from "./types/nextauth";
-import { ActionResponse } from "./types/global";
+
+async function signInWithOAuth({
+  user,
+  provider,
+  providerAccountId,
+}: SignInWithOAuthParams): Promise<boolean> {
+  const validatedData = SignInWithOAuthSchema.safeParse({
+    provider,
+    providerAccountId,
+    user,
+  });
+
+  if (!validatedData.success) return false;
+
+  await dbConnect();
+
+  const { name, username, email, image } = user;
+  const slugifiedUsername = slugify(username, {
+    lower: true,
+    strict: true,
+    trim: true,
+  });
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    let existingUser = await User.findOne({ email }).session(session);
+
+    if (!existingUser) {
+      [existingUser] = await User.create(
+        [{ name, username: slugifiedUsername, email, image }],
+        { session }
+      );
+    } else {
+      const updatedData: { name?: string; image?: string } = {};
+
+      if (existingUser.name !== name) updatedData.name = name;
+      if (existingUser.image !== image) updatedData.image = image;
+
+      if (Object.keys(updatedData).length > 0) {
+        await User.updateOne(
+          { _id: existingUser._id },
+          { $set: updatedData }
+        ).session(session);
+      }
+    }
+
+    const existingAccount = await Account.findOne({
+      userId: existingUser._id,
+      provider,
+      providerAccountId,
+    }).session(session);
+
+    if (!existingAccount) {
+      await Account.create(
+        [
+          {
+            userId: existingUser._id,
+            name,
+            image,
+            provider,
+            providerAccountId,
+          },
+        ],
+        { session }
+      );
+    }
+
+    await session.commitTransaction();
+    return true;
+  } catch (error) {
+    await session.abortTransaction();
+    console.error("OAuth sign-in failed", error);
+    return false;
+  } finally {
+    await session.endSession();
+  }
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -19,15 +99,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (validatedFields.success) {
           const { email, password } = validatedFields.data;
 
-          const { data: existingAccount } = (await api.accounts.getByProvider(
-            email
-          )) as ActionResponse<IAccountDoc>;
+          await dbConnect();
+
+          const existingAccount = await Account.findOne({
+            providerAccountId: email,
+          });
 
           if (!existingAccount) return null;
 
-          const { data: existingUser } = (await api.users.getById(
-            existingAccount.userId.toString()
-          )) as ActionResponse<IUserDoc>;
+          const existingUser = await User.findById(existingAccount.userId);
 
           if (!existingUser) return null;
 
@@ -60,9 +140,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.role = token.role; // Ensure fresh role
         return session;
       }
-      const { data: existingUser } = (await api.users.getById(
-        token.sub!
-      )) as ActionResponse<IUserDoc>;
+
+      await dbConnect();
+      const existingUser = await User.findById(token.sub);
 
       session.user.id = token.sub!;
       session.user.role = (existingUser?.role as UserRole) || token.role; // Ensure fresh role
@@ -78,22 +158,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.email = user.email;
       }
       if (account) {
-        const { data: existingAccount, success } =
-          (await api.accounts.getByProvider(
+        await dbConnect();
+
+        const existingAccount = await Account.findOne({
+          providerAccountId:
             account.type === "credentials"
               ? token.email!
-              : account.providerAccountId
-          )) as ActionResponse<IAccountDoc>;
+              : account.providerAccountId,
+        });
 
-        if (!success || !existingAccount) return token;
+        if (!existingAccount) return token;
 
         const userId = existingAccount.userId;
 
         if (userId) token.sub = userId.toString();
 
-        const { data: existingUser } = (await api.users.getById(
-          existingAccount.userId.toString()
-        )) as ActionResponse<IUserDoc>;
+        const existingUser = await User.findById(existingAccount.userId);
 
         if (existingUser) {
           token.role = existingUser.role; // Fetch role from DB
@@ -106,22 +186,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (account?.type === "credentials") return true;
       if (!account || !user) return false;
 
-      const userInfo = {
-        name: user.name!,
-        email: user.email!,
-        image: user.image!,
-        username: user.name?.toLowerCase() as string,
-      };
-
-      const { success } = (await api.auth.oAuthSignIn({
-        user: userInfo,
+      return signInWithOAuth({
+        user: {
+          name: user.name!,
+          email: user.email!,
+          image: user.image!,
+          username: user.name?.toLowerCase() as string,
+        },
         provider: account.provider as "google",
         providerAccountId: account.providerAccountId,
-      })) as ActionResponse;
-
-      if (!success) return false;
-
-      return true;
+      });
     },
   },
 });
