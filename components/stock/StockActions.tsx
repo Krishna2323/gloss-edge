@@ -2,7 +2,7 @@
 
 import { ArrowLeftRight, ArrowUpDown, Minus, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ReactNode, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { adjustStock, transferStock } from "@/lib/actions/stock.actions";
+import { fieldClass, Label, QtyStepper } from "./fields";
 import { cn } from "@/lib/utils";
 
 type City = { _id: string; name: string; qty: number };
@@ -26,18 +27,6 @@ const REASONS = {
   in: ["Received", "Returned", "Correction"],
   out: ["Sold", "Dispatched", "Damaged", "Correction"],
 };
-
-const fieldClass =
-  "h-[52px] w-full rounded-2xl border border-white/[0.08] bg-[#0A0A0B] px-4 text-[15px] text-fg shadow-well outline-none focus:border-gold/40";
-
-const Label = ({ htmlFor, children }: { htmlFor: string; children: ReactNode }) => (
-  <label
-    htmlFor={htmlFor}
-    className="text-xs font-semibold uppercase tracking-[0.08em] text-fg-muted"
-  >
-    {children}
-  </label>
-);
 
 const CitySelect = ({
   id,
@@ -63,55 +52,6 @@ const CitySelect = ({
     ))}
   </select>
 );
-
-const QtyStepper = ({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-}) => {
-  const n = Number(value) || 0;
-
-  return (
-    <div className="flex items-center gap-3">
-      <Button
-        type="button"
-        variant="raised"
-        size="tap-icon"
-        className="size-14 shrink-0"
-        aria-label="Decrease quantity"
-        onClick={() => onChange(String(Math.max(0, n - 1)))}
-      >
-        <Minus />
-      </Button>
-      <label htmlFor="qty" className="sr-only">
-        Quantity
-      </label>
-      <input
-        id="qty"
-        inputMode="numeric"
-        pattern="[0-9]*"
-        value={value}
-        onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, 6))}
-        className={cn(
-          fieldClass,
-          "font-wide h-14 text-center text-[28px] font-extrabold tabular-nums"
-        )}
-      />
-      <Button
-        type="button"
-        variant="raised"
-        size="tap-icon"
-        className="size-14 shrink-0"
-        aria-label="Increase quantity"
-        onClick={() => onChange(String(n + 1))}
-      >
-        <Plus />
-      </Button>
-    </div>
-  );
-};
 
 const sheetClass =
   "flex max-h-[92vh] flex-col gap-5 overflow-y-auto rounded-t-[28px] border-white/10 bg-gradient-to-b from-[#1A1A1D] to-[#0C0C0E] px-5 pb-8 pt-3 font-archivo text-fg";

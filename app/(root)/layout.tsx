@@ -9,7 +9,7 @@ const navFor = (role?: string): NavItem[] => {
       { href: "/", label: "Home", icon: "home" },
       { href: "/products", label: "Stock", icon: "stock" },
       {
-        href: "/admin/products/add",
+        href: "/products/new",
         label: "Add product",
         icon: "add",
         primary: true,

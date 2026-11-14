@@ -109,40 +109,65 @@ export const SignInWithOAuthSchema = z.object({
 export const ProductSchema = z.object({
   title: z
     .string()
-    .min(5, { message: "Title is required." })
+    .trim()
+    .min(5, { message: "Title needs at least 5 characters." })
     .max(100, { message: "Title cannot exceed 100 characters." }),
   brand: z
     .string()
-    .min(5, { message: "Title is required." })
-    .max(100, { message: "Title cannot exceed 100 characters." }),
-  description: z.string().min(1, { message: "Body is required." }),
+    .trim()
+    .min(2, { message: "Brand is required." })
+    .max(100, { message: "Brand cannot exceed 100 characters." }),
+  description: z
+    .string()
+    .trim()
+    .min(1, { message: "Description is required." })
+    .max(200, { message: "Description cannot exceed 200 characters." }),
   categories: z
     .array(
       z
         .string()
+        .trim()
         .min(1, { message: "Category is required." })
         .max(30, { message: "Category cannot exceed 30 characters." })
     )
-    .min(1, { message: "At least one category is required." })
+    .min(1, { message: "Add at least one category." })
     .max(3, { message: "Cannot add more than 3 categories." }),
-
-  stock: z.number().min(0, { message: "Please enter stock." }),
   code: z
     .string()
+    .trim()
     .min(1, { message: "Code is required." })
     .max(100, { message: "Code cannot exceed 100 characters." }),
-  remark: z
+  color: z
     .string()
-    .min(2, { message: "Remark is required." })
-    .max(100, { message: "Remark cannot exceed 100 characters." }),
+    .regex(/^#[0-9a-fA-F]{6}$/, { message: "Pick a colour." })
+    .optional(),
+  lowStockAt: z
+    .number({ invalid_type_error: "Enter a whole number." })
+    .int({ message: "Enter a whole number." })
+    .min(0, { message: "Cannot be negative." })
+    .max(100000, { message: "Too large." })
+    .optional(),
+});
+
+export const CreateProductSchema = ProductSchema.extend({
+  startingStock: z
+    .number()
+    .int({ message: "Enter a whole number." })
+    .min(0, { message: "Cannot be negative." })
+    .max(999999, { message: "Too large." }),
+  locationID: z.string().optional(),
+}).refine((p) => p.startingStock === 0 || !!p.locationID, {
+  message: "Choose a city for the starting stock.",
+  path: ["locationID"],
 });
 
 export const EditProductSchema = ProductSchema.extend({
   productID: z.string().min(1, { message: "product ID is required." }),
-  // remark: z
-  //   .string()
-  //   .min(2, { message: "Remark is required." })
-  //   .max(100, { message: "Remark cannot exceed 100 characters." }),
+  remark: z
+    .string()
+    .trim()
+    .max(100, { message: "Note cannot exceed 100 characters." })
+    .optional(),
 });
 
 export const GetProductSchema = z.object({

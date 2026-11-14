@@ -1,21 +1,9 @@
-import AddEditProductForm from "@/components/admin/AddEditProductForm";
-import { getProduct } from "@/lib/actions/product.actions";
+import { redirect } from "next/navigation";
 import { RouteParams } from "@/types/global";
-import { notFound } from "next/navigation";
-import React from "react";
 
 const page = async ({ params }: RouteParams) => {
   const { id } = await params;
-  if (!id) return notFound();
-
-  const { data: product, success } = await getProduct({ productID: id });
-  if (!success) return notFound();
-
-  return (
-    <div>
-      <AddEditProductForm isEditAction product={product} />
-    </div>
-  );
+  redirect(`/products/${id}/edit`);
 };
 
 export default page;

@@ -32,6 +32,8 @@ interface Product {
   stock: number;
   code: string;
   creator: User;
+  color?: string;
+  lowStockAt?: number;
 }
 
 interface ProductHistory {

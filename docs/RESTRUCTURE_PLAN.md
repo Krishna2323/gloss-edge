@@ -54,8 +54,8 @@ Progress:
 - [x] Migration `scripts/migrations/001-opening-stock-gorakhpur.ts`, verified on the local copy
 - [x] Tested locally: rejects overselling, rolls back on failure, ledger balances match,
       10 parallel removals never oversell
-- [ ] Screens must stop editing `products.stock` directly (the product form still does).
-      New products put their starting stock into a chosen city through `applyStockChange`
+- [x] Screens stop editing `products.stock` directly. New products put their starting stock
+      into a chosen city through `applyStockChange`
 - [x] Role checks: `staff` sees inventory and per-city stock, `business` sees totals only.
       Stock changes stay admin only
 
@@ -79,8 +79,9 @@ Migration (tested on the local copy first, fresh backup before running on prod):
       Names unique ignoring case. Cities in the admin nav, Users in the account sheet
 - [x] Home dashboard: units, low and out tiles that open the filtered list, stock by city,
       running low list and latest movements. Business sees tiles only
-- [ ] Add and edit product in the new style. Starting stock goes into a chosen city,
-      and the form stops editing `products.stock` directly
+- [x] Add and edit product at `/products/new` and `/products/[id]/edit` (old admin URLs redirect).
+      Starting stock goes into a chosen city, edit never touches stock, optional colour and
+      low stock limit. Delete only when the product has no stock
 - [ ] History and users pages in the new style
 - Stock adjust sheet (in, out, transfer) with remark
 - Product detail page with per-city stock and movement history

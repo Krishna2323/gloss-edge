@@ -4,10 +4,10 @@ import mongoose, { FilterQuery } from "mongoose";
 import action from "../handlers/action";
 import handleError from "../handlers/error";
 import {
+  CreateProductSchema,
   EditProductSchema,
   GetProductSchema,
   PaginatedSearchParamsSchema,
-  ProductSchema,
 } from "../validations";
 import Product, { IProductDoc } from "@/database/models/product.model";
 import CategoryProduct from "@/database/models/category-product.model";
@@ -15,7 +15,11 @@ import Category, { ICategoryDoc } from "@/database/models/category.model";
 import ProductHistory, {
   ProductChanges,
 } from "@/database/models/product-history.model";
-import { isAdmin as isAdminUtil } from "../utils";
+import Location from "@/database/models/location.model";
+import StockLevel from "@/database/models/stock-level.model";
+import { ForbiddenError, NotFoundError } from "../http-errors";
+import { applyStockChange } from "../stock";
+import { escapeRegex, isAdmin as isAdminUtil } from "../utils";
 import {
   ActionResponse,
   ErrorResponse,
@@ -24,12 +28,18 @@ import {
   ProductHistory as ProductHistoryType,
 } from "@/types/global";
 
+const uniqueNames = (names: string[]) =>
+  names.filter(
+    (name, i) =>
+      names.findIndex((n) => n.toLowerCase() === name.toLowerCase()) === i
+  );
+
 export async function createProduct(
   params: CreateProductParams
-): Promise<ActionResponse<IProductDoc>> {
+): Promise<ActionResponse<{ _id: string }>> {
   const validationResult = await action({
     params,
-    schema: ProductSchema,
+    schema: CreateProductSchema,
     authorize: true,
     isAdminAction: true,
   });
@@ -38,56 +48,76 @@ export async function createProduct(
     return handleError(validationResult) as ErrorResponse;
   }
 
-  const { title, brand, categories, code, description, stock } =
-    validationResult.params!;
-  const userId = validationResult?.session?.user?.id;
+  const {
+    title,
+    brand,
+    categories,
+    code,
+    description,
+    color,
+    lowStockAt,
+    startingStock,
+    locationID,
+  } = CreateProductSchema.parse(validationResult.params);
+  const userId = validationResult.session!.user.id!;
 
   const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
-    const [product] = await Product.create(
-      [{ title, description, brand, code, stock, creator: userId }],
-      { session }
-    );
-
-    if (!product) {
-      throw new Error("Failed to create product");
-    }
-
-    const categoryIds: mongoose.Types.ObjectId[] = [];
-    const categoryProductDocuments = [];
-
-    for (const category of categories) {
-      const existingCategory = await Category.findOneAndUpdate(
-        { name: { $regex: new RegExp(`^${category}$`, "i") } },
-        { $setOnInsert: { name: category }, $inc: { products: 1 } },
-        { upsert: true, new: true, session }
+    let productId = "";
+    await session.withTransaction(async () => {
+      const [product] = await Product.create(
+        [
+          {
+            title,
+            description,
+            brand,
+            code,
+            color,
+            lowStockAt,
+            stock: 0,
+            creator: userId,
+          },
+        ],
+        { session }
       );
 
-      categoryIds.push(existingCategory._id);
-      categoryProductDocuments.push({
-        category: existingCategory._id,
-        product: product._id,
-      });
-    }
+      const categoryProductDocuments = [];
+      for (const category of uniqueNames(categories)) {
+        const existingCategory = await Category.findOneAndUpdate(
+          { name: new RegExp(`^${escapeRegex(category)}$`, "i") },
+          { $setOnInsert: { name: category }, $inc: { products: 1 } },
+          { upsert: true, new: true, session }
+        );
+        product.categories.push(existingCategory._id);
+        categoryProductDocuments.push({
+          category: existingCategory._id,
+          product: product._id,
+        });
+      }
 
-    await CategoryProduct.insertMany(categoryProductDocuments, { session });
+      await CategoryProduct.insertMany(categoryProductDocuments, { session });
+      await product.save({ session });
 
-    await Product.findByIdAndUpdate(
-      product._id,
-      { $push: { categories: { $each: categoryIds } } },
-      { session }
-    );
+      if (startingStock > 0 && locationID) {
+        await applyStockChange({
+          productId: product._id.toString(),
+          locationId: locationID,
+          change: startingStock,
+          type: "in",
+          reason: "New product",
+          userId,
+          session,
+        });
+      }
 
-    await session.commitTransaction();
+      productId = product._id.toString();
+    });
 
-    return { success: true, data: JSON.parse(JSON.stringify(product)) };
+    return { success: true, data: { _id: productId } };
   } catch (error) {
-    await session.abortTransaction();
     return handleError(error) as ErrorResponse;
   } finally {
-    session.endSession();
+    await session.endSession();
   }
 }
 
@@ -111,10 +141,11 @@ export async function editProduct(
     categories,
     code,
     description,
-    stock,
     title,
     remark,
-  } = validationResult.params!;
+    color,
+    lowStockAt,
+  } = EditProductSchema.parse(validationResult.params);
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -123,7 +154,7 @@ export async function editProduct(
     const product = await Product.findById(productID).populate("categories");
 
     if (!product) {
-      throw new Error("Product not found");
+      throw new NotFoundError("Product");
     }
 
     const changes: ProductChanges = {};
@@ -134,28 +165,26 @@ export async function editProduct(
       changes.description = { old: product.description, new: description };
     if (product.brand !== brand)
       changes.brand = { old: product.brand, new: brand };
-    if (product.stock !== stock)
-      changes.stock = { old: product.stock, new: stock };
     if (product.code !== code) changes.code = { old: product.code, new: code };
 
     if (
       product.title !== title ||
       product.description !== description ||
       product.brand !== brand ||
-      product.stock !== stock ||
       product.code !== code
     ) {
       product.title = title;
       product.description = description;
       product.brand = brand;
-      product.stock = stock;
       product.code = code;
       await product.save({ session });
     }
-    const categoriesToAdd = categories.filter(
+    product.color = color;
+    product.lowStockAt = lowStockAt;
+    const categoriesToAdd = uniqueNames(categories).filter(
       (category) =>
-        !product.categories.some((t: ICategoryDoc) =>
-          t.name.toLowerCase().includes(category.toLowerCase())
+        !product.categories.some(
+          (t: ICategoryDoc) => t.name.toLowerCase() === category.toLowerCase()
         )
     );
 
@@ -169,7 +198,7 @@ export async function editProduct(
     if (categoriesToAdd.length > 0) {
       for (const category of categoriesToAdd) {
         const existingCategory = await Category.findOneAndUpdate(
-          { name: new RegExp(`^${category}$`, "i") },
+          { name: new RegExp(`^${escapeRegex(category)}$`, "i") },
           { $setOnInsert: { name: category }, $inc: { products: 1 } },
           { upsert: true, new: true, session }
         );
@@ -462,8 +491,19 @@ export async function deleteProduct(params: {
         .session(session);
 
       if (!product) {
-        throw new Error("Product not found");
+        throw new NotFoundError("Product");
       }
+
+      const stocked = await StockLevel.exists({
+        product: productID,
+        quantity: { $gt: 0 },
+      }).session(session);
+      if (stocked) {
+        throw new ForbiddenError(
+          "This product still has stock. Move or remove it first."
+        );
+      }
+      await StockLevel.deleteMany({ product: productID }, { session });
 
       // Normalize category ids (handle possible mixed types)
       const categoryIdsRaw = (product.categories || []) as Array<
@@ -527,5 +567,47 @@ export async function deleteProduct(params: {
     return handleError(error) as ErrorResponse;
   } finally {
     await session.endSession();
+  }
+}
+
+export type ProductFormOptions = {
+  brands: string[];
+  categories: string[];
+  cities: { _id: string; name: string }[];
+};
+
+export async function getProductFormOptions(): Promise<
+  ActionResponse<ProductFormOptions>
+> {
+  const validationResult = await action({
+    authorize: true,
+    isAdminAction: true,
+  });
+
+  if (validationResult instanceof Error) {
+    return handleError(validationResult) as ErrorResponse;
+  }
+
+  try {
+    const [brands, categories, cities] = await Promise.all([
+      Product.distinct("brand") as Promise<string[]>,
+      Category.find({ products: { $gt: 0 } })
+        .sort({ products: -1 })
+        .lean<{ name: string }[]>(),
+      Location.find({ active: true })
+        .sort({ name: 1 })
+        .lean<{ _id: mongoose.Types.ObjectId; name: string }[]>(),
+    ]);
+
+    return {
+      success: true,
+      data: {
+        brands: uniqueNames(brands.map((b) => b.trim())).sort(),
+        categories: categories.map((c) => c.name),
+        cities: cities.map((c) => ({ _id: c._id.toString(), name: c.name })),
+      },
+    };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
   }
 }

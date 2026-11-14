@@ -1,12 +1,5 @@
-import AddEditProductForm from "@/components/admin/AddEditProductForm";
-import React from "react";
+import { redirect } from "next/navigation";
 
-const page = () => {
-  return (
-    <div>
-      <AddEditProductForm />
-    </div>
-  );
-};
+const page = () => redirect("/products/new");
 
 export default page;

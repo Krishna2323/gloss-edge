@@ -17,18 +17,24 @@ interface AuthCredentials {
   password: string;
 }
 
-interface CreateProductParams {
+interface ProductFieldsParams {
   brand: string;
   title: string;
   description: string;
-  stock: number;
   categories: string[];
   code: string;
+  color?: string;
+  lowStockAt?: number;
 }
 
-interface EditProductParams extends CreateProductParams {
+interface CreateProductParams extends ProductFieldsParams {
+  startingStock: number;
+  locationID?: string;
+}
+
+interface EditProductParams extends ProductFieldsParams {
   productID: string;
-  remark: string;
+  remark?: string;
 }
 
 interface GetProductParams {

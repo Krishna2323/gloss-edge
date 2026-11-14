@@ -46,7 +46,7 @@ const ProductDetailPage = async ({ params }: RouteParams) => {
           </Link>
           {canEdit && (
             <Link
-              href={`/admin/products/${product._id}`}
+              href={`/products/${product._id}/edit`}
               className="flex h-11 items-center rounded-[14px] border border-white/15 bg-ink-950/50 px-4 text-sm font-bold text-white"
             >
               Edit

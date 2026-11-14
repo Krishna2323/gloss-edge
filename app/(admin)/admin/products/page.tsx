@@ -9,7 +9,7 @@ const page = () => {
         asChild
         className="primary-gradient paragraph-medium min-h-12 w-full max-w-64 rounded-2 px-4 py-3 font-inter !text-light-900"
       >
-        <Link href={"/admin/products/add"}>Add Products</Link>
+        <Link href={"/products/new"}>Add Products</Link>
       </Button>
       <Button
         asChild
