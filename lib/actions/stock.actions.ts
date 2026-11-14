@@ -234,12 +234,17 @@ async function getCityStats() {
             $sum: {
               $cond: [
                 {
-                  $lt: [
-                    "$quantity",
+                  $and: [
+                    { $gt: ["$quantity", 0] },
                     {
-                      $ifNull: [
-                        { $first: "$p.lowStockAt" },
-                        LOW_STOCK_DEFAULT,
+                      $lt: [
+                        "$quantity",
+                        {
+                          $ifNull: [
+                            { $first: "$p.lowStockAt" },
+                            LOW_STOCK_DEFAULT,
+                          ],
+                        },
                       ],
                     },
                   ],

@@ -1,4 +1,5 @@
 import { auth, signOut } from "@/auth";
+import { isAdmin } from "@/lib/utils";
 import AccountMenu from "./AccountMenu";
 
 const PageHeader = async ({ title }: { title: string }) => {
@@ -14,6 +15,11 @@ const PageHeader = async ({ title }: { title: string }) => {
           name={session.user.name ?? "Account"}
           email={session.user.email}
           role={session.user.role}
+          links={
+            isAdmin(session.user.role)
+              ? [{ href: "/admin/users", label: "Users" }]
+              : undefined
+          }
           signOutAction={async () => {
             "use server";
 

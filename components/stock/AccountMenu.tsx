@@ -1,23 +1,26 @@
 "use client";
 
+import Link from "next/link";
 import { LogOut } from "lucide-react";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 interface Props {
   name: string;
   email?: string | null;
   role?: string;
   signOutAction: () => Promise<void>;
+  links?: { href: string; label: string }[];
 }
 
-const AccountMenu = ({ name, email, role, signOutAction }: Props) => (
+const AccountMenu = ({ name, email, role, signOutAction, links }: Props) => (
   <Sheet>
     <SheetTrigger
       aria-label="Account"
@@ -43,6 +46,16 @@ const AccountMenu = ({ name, email, role, signOutAction }: Props) => (
           )}
         </SheetDescription>
       </div>
+      {links?.map(({ href, label }) => (
+        <SheetClose key={href} asChild>
+          <Link
+            href={href}
+            className={buttonVariants({ variant: "raised", size: "tap" })}
+          >
+            {label}
+          </Link>
+        </SheetClose>
+      ))}
       <form action={signOutAction}>
         <Button type="submit" variant="raised" size="tap" className="w-full">
           <LogOut aria-hidden="true" />

@@ -10,7 +10,7 @@ import StatTiles from "@/components/stock/StatTiles";
 import { PRODUCTS_PER_PAGE } from "@/constants";
 import { getStockOverview } from "@/lib/actions/stock.actions";
 import { buildHref } from "@/lib/url";
-import { canSeeCityStock, canSeeInventory } from "@/lib/utils";
+import { canSeeCityStock, canSeeInventory, isAdmin } from "@/lib/utils";
 
 interface Props {
   searchParams: Promise<Record<string, string | undefined>>;
@@ -62,7 +62,11 @@ const ProductsPage = async ({ searchParams }: Props) => {
       <div className="flex gap-2.5 px-5 pt-7">
         <SearchField placeholder="Code, name, brand" />
         {showCities && locations.length > 0 && (
-          <CityPicker cities={locations} selectedId={city} />
+          <CityPicker
+            cities={locations}
+            selectedId={city}
+            manageHref={isAdmin(session?.user.role) ? "/cities" : undefined}
+          />
         )}
       </div>
 

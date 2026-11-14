@@ -212,3 +212,26 @@ export const StockOverviewSchema = z.object({
     .optional()
     .or(z.literal("")),
 });
+
+const cityName = z
+  .string()
+  .trim()
+  .min(2, { message: "City name is too short." })
+  .max(40, { message: "City name cannot exceed 40 characters." })
+  .regex(/^[\p{L}][\p{L} .'-]*$/u, {
+    message: "Use letters, spaces, dots or hyphens only.",
+  });
+
+export const CreateCitySchema = z.object({
+  name: cityName,
+  state: z.string().trim().max(40).optional(),
+});
+
+export const UpdateCitySchema = CreateCitySchema.extend({
+  locationID: z.string().regex(/^[a-f0-9]{24}$/, { message: "Unknown city." }),
+});
+
+export const SetCityActiveSchema = z.object({
+  locationID: z.string().regex(/^[a-f0-9]{24}$/, { message: "Unknown city." }),
+  active: z.boolean(),
+});

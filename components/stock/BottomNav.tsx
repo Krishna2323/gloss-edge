@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, History, Home, Plus, Users } from "lucide-react";
+import { BarChart3, History, Home, MapPin, Plus, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const icons = {
@@ -11,6 +11,7 @@ const icons = {
   add: Plus,
   history: History,
   users: Users,
+  cities: MapPin,
 };
 
 export type NavItem = {

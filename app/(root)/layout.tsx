@@ -15,7 +15,7 @@ const navFor = (role?: string): NavItem[] => {
         primary: true,
       },
       { href: "/admin/products/history", label: "History", icon: "history" },
-      { href: "/admin/users", label: "Users", icon: "users" },
+      { href: "/cities", label: "Cities", icon: "cities" },
     ];
   }
   if (canSeeInventory(role)) {

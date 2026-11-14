@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronDown, MapPin } from "lucide-react";
+import Link from "next/link";
+import { ChevronDown, MapPin, Settings2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import {
@@ -22,9 +23,10 @@ interface City {
 interface Props {
   cities: City[];
   selectedId: string;
+  manageHref?: string;
 }
 
-const CityPicker = ({ cities, selectedId }: Props) => {
+const CityPicker = ({ cities, selectedId, manageHref }: Props) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -115,6 +117,17 @@ const CityPicker = ({ cities, selectedId }: Props) => {
             </p>
           )}
         </div>
+
+        {manageHref && (
+          <Link
+            href={manageHref}
+            onClick={() => setOpen(false)}
+            className="flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl border border-white/[0.08] text-sm font-bold text-fg-muted"
+          >
+            <Settings2 aria-hidden="true" className="size-4" />
+            Manage cities
+          </Link>
+        )}
       </SheetContent>
     </Sheet>
   );

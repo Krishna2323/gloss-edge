@@ -75,7 +75,12 @@ Migration (tested on the local copy first, fresh backup before running on prod):
       Checked at phone and desktop width, admin and business roles
 - [x] Product detail screen: stock per city, movement history, Stock in, Out and Move sheets.
       Tested end to end in a browser on the local copy, for admin, staff and business
-- [ ] Cities screen (add, rename, deactivate). Move needs two cities, and only Gorakhpur exists
+- [x] Cities screen at `/cities`: add, rename, deactivate (only when empty), reactivate.
+      Names unique ignoring case. Cities in the admin nav, Users in the account sheet
+- [ ] Home dashboard
+- [ ] Add and edit product in the new style. Starting stock goes into a chosen city,
+      and the form stops editing `products.stock` directly
+- [ ] History and users pages in the new style
 - Stock adjust sheet (in, out, transfer) with remark
 - Product detail page with per-city stock and movement history
 - Dashboard: stock by city, out-of-stock and low-stock lists, recent movements

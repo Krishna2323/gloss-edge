@@ -51,3 +51,12 @@ interface TransferStockParams {
   quantity: number;
   note?: string;
 }
+
+interface CreateCityParams {
+  name: string;
+  state?: string;
+}
+
+interface UpdateCityParams extends CreateCityParams {
+  locationID: string;
+}
