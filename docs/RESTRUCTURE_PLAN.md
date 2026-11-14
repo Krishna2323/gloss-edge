@@ -17,15 +17,25 @@ Living checklist for the gloss-edge restructure. Production data lives in Atlas
 - [ ] Pick the visual direction from the mockups
 - [ ] Confirm the 5 admin accounts are expected
 
-Open questions:
+Decided (2026-11-15):
 
-1. Who changes stock in a city: only the admin, or distributors who log in?
-2. Is a location one distributor in one city, or can a city have several?
-3. Do business customers see stock per city, only their own city, or only a total?
-4. Main device for daily use: phone or laptop?
-5. Which city holds today's stock (the migration puts all current stock there)?
-6. Are transfers between cities needed?
-7. Is a low-stock warning wanted, and with one threshold or one per product?
+1. Only the admin changes city stock for now
+2. One location per city, expect 10 to 20 cities, so no screen may assume two
+3. Business customers do not see per-city stock
+4. Mobile first, the admin uses a phone
+5. Transfers between cities are needed
+6. Low-stock warning is wanted
+7. Visual direction approved: bold premium dark, dense lists with generous spacing,
+   Archivo (wide for headings and numbers), one gold accent, per-city mini bar chart in rows
+
+Still open:
+
+- Name of the city that holds today's stock (the migration puts all current stock there)
+- Name of the second city
+- Employees: new `staff` role that sees per-city stock, or reuse `business`
+- Low-stock threshold: one default for all products with a per-product override?
+
+Mockups: https://claude.ai/artifact/9wEKqF9VWetkvrm7rynyia
 
 ## Phase 2: Multi-city stock
 
