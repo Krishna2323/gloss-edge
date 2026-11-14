@@ -25,7 +25,6 @@ import {
   ErrorResponse,
   PaginatedSearchParams,
   Product as ProductInterface,
-  ProductHistory as ProductHistoryType,
 } from "@/types/global";
 
 const uniqueNames = (names: string[]) =>
@@ -383,79 +382,6 @@ export async function getProducts(params: PaginatedSearchParams): Promise<
         products: JSON.parse(JSON.stringify(products)),
         isNext,
         totalProducts,
-      },
-    };
-  } catch (error) {
-    return handleError(error) as ErrorResponse;
-  }
-}
-
-type GetProductsHistoryParams = {
-  page?: number;
-  pageSize?: number;
-  from?: string; // ISO
-  to?: string; // ISO
-};
-
-export async function getProductsHistory(
-  params?: GetProductsHistoryParams
-): Promise<
-  ActionResponse<{
-    productHistories: ProductHistoryType[];
-    isNext: boolean;
-    total: number;
-  }>
-> {
-  const validationResult = await action({
-    params,
-    schema: (await import("../validations")).ProductHistoryParamsSchema,
-    isAdminAction: true,
-    authorize: true,
-  });
-
-  if (validationResult instanceof Error) {
-    return handleError(validationResult) as ErrorResponse;
-  }
-
-  try {
-    const {
-      page = 1,
-      pageSize = 20,
-      from,
-      to,
-    } = (validationResult as { params?: GetProductsHistoryParams }).params || {
-      page: 1,
-      pageSize: 20,
-    };
-
-    const skip = (Number(page) - 1) * Number(pageSize);
-    const limit = Number(pageSize);
-
-    const dateFilter: Record<string, Date> = {};
-    if (from) dateFilter.$gte = new Date(from);
-    if (to) dateFilter.$lte = new Date(to);
-
-    const filter: Record<string, unknown> = {};
-    if (from || to) filter.createdAt = dateFilter;
-
-    const total = await ProductHistory.countDocuments(filter);
-
-    const productHistories = await ProductHistory.find(filter)
-      .sort({ createdAt: -1 })
-      .populate("categoriesAdded")
-      .populate("product")
-      .populate("categoriesRemoved")
-      .skip(skip)
-      .limit(limit);
-
-    const isNext = total > skip + productHistories.length;
-
-    return {
-      success: true,
-      data: {
-        productHistories: JSON.parse(JSON.stringify(productHistories)),
-        isNext,
-        total,
       },
     };
   } catch (error) {

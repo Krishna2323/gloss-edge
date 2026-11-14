@@ -82,7 +82,9 @@ Migration (tested on the local copy first, fresh backup before running on prod):
 - [x] Add and edit product at `/products/new` and `/products/[id]/edit` (old admin URLs redirect).
       Starting stock goes into a chosen city, edit never touches stock, optional colour and
       low stock limit. Delete only when the product has no stock
-- [ ] History and users pages in the new style
+- [x] History at `/history` (old admin URL redirects): new stock changes and the old product
+      edits in one timeline grouped by day, with search, city and type filters
+- [ ] Users page in the new style
 - Stock adjust sheet (in, out, transfer) with remark
 - Product detail page with per-city stock and movement history
 - Dashboard: stock by city, out-of-stock and low-stock lists, recent movements

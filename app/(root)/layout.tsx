@@ -14,7 +14,7 @@ const navFor = (role?: string): NavItem[] => {
         icon: "add",
         primary: true,
       },
-      { href: "/admin/products/history", label: "History", icon: "history" },
+      { href: "/history", label: "History", icon: "history" },
       { href: "/cities", label: "Cities", icon: "cities" },
     ];
   }

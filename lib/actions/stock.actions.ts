@@ -293,7 +293,7 @@ export async function getLocations(): Promise<
 
 export type ProductMovement = {
   _id: string;
-  type: "opening" | "in" | "out" | "transfer" | "correction";
+  type: "opening" | "in" | "out" | "transfer" | "correction" | "edit";
   city?: string;
   from?: string;
   to?: string;
@@ -302,7 +302,8 @@ export type ProductMovement = {
   note?: string;
   user?: string;
   at: string;
-  product?: { _id: string; code: string };
+  product?: { _id?: string; code: string };
+  summary?: string;
 };
 
 export type ProductDetail = {
@@ -325,7 +326,7 @@ export type ProductDetail = {
 
 type MovementDoc = {
   _id: mongoose.Types.ObjectId;
-  type: ProductMovement["type"];
+  type: Exclude<ProductMovement["type"], "edit">;
   change: number;
   reason?: string;
   note?: string;

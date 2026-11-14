@@ -56,6 +56,30 @@ export const isBusinessAccount = (role?: UserRole | undefined | string) => {
 
 const IST = "Asia/Kolkata";
 
+export const formatTime = (iso: string) =>
+  new Date(iso).toLocaleTimeString("en-IN", {
+    timeZone: IST,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
+export const formatDay = (iso: string, now = new Date()) => {
+  const day = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: IST });
+  const date = new Date(iso);
+  if (day(date) === day(now)) return "Today";
+  if (day(date) === day(new Date(now.getTime() - 86_400_000))) {
+    return "Yesterday";
+  }
+  return date.toLocaleDateString("en-IN", {
+    timeZone: IST,
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    ...(day(date).slice(0, 4) !== day(now).slice(0, 4) && { year: "numeric" }),
+  });
+};
+
 export const formatWhen = (iso: string, now = new Date()) => {
   const date = new Date(iso);
   const day = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: IST });

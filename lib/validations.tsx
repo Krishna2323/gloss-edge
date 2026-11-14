@@ -182,13 +182,6 @@ export const PaginatedSearchParamsSchema = z.object({
   sort: z.string().optional(),
 });
 
-export const ProductHistoryParamsSchema = z.object({
-  page: z.number().int().positive().default(1),
-  pageSize: z.number().int().positive().default(20),
-  from: z.string().datetime().optional(), // ISO string
-  to: z.string().datetime().optional(), // ISO string
-});
-
 export const AdjustStockSchema = z
   .object({
     productID: z.string().min(1, { message: "Product is required." }),
@@ -231,6 +224,18 @@ export const StockOverviewSchema = z.object({
   pageSize: z.number().int().positive().max(100).default(20),
   query: z.string().max(100).optional(),
   filter: z.enum(["", "low", "out"]).optional(),
+  city: z
+    .string()
+    .regex(/^[a-f0-9]{24}$/, { message: "Unknown city." })
+    .optional()
+    .or(z.literal("")),
+});
+
+export const HistorySchema = z.object({
+  page: z.number().int().positive().default(1),
+  pageSize: z.number().int().positive().max(100).default(30),
+  query: z.string().max(100).optional(),
+  kind: z.enum(["", "in", "out", "move", "edit"]).optional(),
   city: z
     .string()
     .regex(/^[a-f0-9]{24}$/, { message: "Unknown city." })
