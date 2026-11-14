@@ -243,6 +243,13 @@ export const HistorySchema = z.object({
     .or(z.literal("")),
 });
 
+export const SetUserRoleSchema = z.object({
+  userID: z.string().regex(/^[a-f0-9]{24}$/, { message: "Unknown user." }),
+  role: z.enum(["user", "business", "staff"], {
+    message: "Choose No access, Business or Staff.",
+  }),
+});
+
 const cityName = z
   .string()
   .trim()

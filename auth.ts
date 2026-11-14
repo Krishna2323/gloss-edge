@@ -132,10 +132,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async session({ session, token }) {
-      if (
-        (token?.role && token?.role === "admin") ||
-        token?.role === "business"
-      ) {
+      if (token?.role === "admin") {
         session.user.id = token.sub!;
         session.user.role = token.role; // Ensure fresh role
         return session;

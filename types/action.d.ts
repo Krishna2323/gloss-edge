@@ -66,3 +66,8 @@ interface CreateCityParams {
 interface UpdateCityParams extends CreateCityParams {
   locationID: string;
 }
+
+interface SetUserRoleParams {
+  userID: string;
+  role: "user" | "business" | "staff";
+}

@@ -17,7 +17,7 @@ const PageHeader = async ({ title }: { title: string }) => {
           role={session.user.role}
           links={
             isAdmin(session.user.role)
-              ? [{ href: "/admin/users", label: "Users" }]
+              ? [{ href: "/users", label: "Users" }]
               : undefined
           }
           signOutAction={async () => {

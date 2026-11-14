@@ -84,7 +84,9 @@ Migration (tested on the local copy first, fresh backup before running on prod):
       low stock limit. Delete only when the product has no stock
 - [x] History at `/history` (old admin URL redirects): new stock changes and the old product
       edits in one timeline grouped by day, with search, city and type filters
-- [ ] Users page in the new style
+- [x] Users at `/users` (old admin URL redirects): search, role filters, set access to
+      No access, Business or Staff. Admins and your own account are locked.
+      Role changes apply on the next page load (only admin roles stay cached in the login)
 - Stock adjust sheet (in, out, transfer) with remark
 - Product detail page with per-city stock and movement history
 - Dashboard: stock by city, out-of-stock and low-stock lists, recent movements
@@ -97,7 +99,7 @@ Migration (tested on the local copy first, fresh backup before running on prod):
 - [ ] Delete 3 accounts whose user no longer exists
 - [ ] Fix ESLint config so `next lint` works (flat config vs ESLint 8)
 - [ ] Remove devflow leftovers (`techMap.ts`, devicon helpers, `ASK_QUESTION`, upvote sort, `question` prop)
-- [ ] Bugs: `isBusinessAccount` checks admin, `updateUserRole` toggles instead of setting,
-      category add uses `includes`, "Showing N of M" count, unescaped regex in search,
+- [ ] Bugs: `isBusinessAccount` checks admin, "Showing N of M" count, unescaped regex in
+      the old `getProducts` search,
       `ref: "Profuct"` typo
 - [ ] Remove `NEXT_PUBLIC_API_BASE_URL` from Vercel

@@ -3,15 +3,20 @@
 import { User } from "@/database";
 import action from "../handlers/action";
 import handleError from "../handlers/error";
-import {
-  ActionResponse,
-  ErrorResponse,
-  User as UserInterface,
-} from "@/types/global";
+import { ForbiddenError, NotFoundError } from "../http-errors";
+import { SetUserRoleSchema } from "../validations";
+import { ActionResponse, ErrorResponse } from "@/types/global";
 
-export async function getUsers(): Promise<
-  ActionResponse<{ users: UserInterface[]; totalUsers: number }>
-> {
+export type UserRow = {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: string;
+  isYou: boolean;
+};
+
+export async function getUsers(): Promise<ActionResponse<UserRow[]>> {
   const validationResult = await action({
     isAdminAction: true,
     authorize: true,
@@ -21,24 +26,46 @@ export async function getUsers(): Promise<
     return handleError(validationResult) as ErrorResponse;
   }
 
+  const myId = validationResult.session?.user.id;
+
   try {
-    const totalUsers = await User.countDocuments();
-    const users = await User.find().sort({ createdAt: -1 });
+    const users = await User.find(
+      {},
+      { name: 1, email: 1, role: 1, createdAt: 1 }
+    )
+      .sort({ createdAt: -1 })
+      .lean<
+        {
+          _id: { toString(): string };
+          name: string;
+          email: string;
+          role: string;
+          createdAt: Date;
+        }[]
+      >();
 
     return {
       success: true,
-      data: { users: JSON.parse(JSON.stringify(users)), totalUsers },
+      data: users.map((u) => ({
+        _id: u._id.toString(),
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        createdAt: new Date(u.createdAt).toISOString(),
+        isYou: u._id.toString() === myId,
+      })),
     };
   } catch (error) {
     return handleError(error) as ErrorResponse;
   }
 }
 
-export async function updateUserRole(
-  userID: string,
-  role: string
-): Promise<ActionResponse> {
+export async function setUserRole(
+  params: SetUserRoleParams
+): Promise<ActionResponse<{ role: string }>> {
   const validationResult = await action({
+    params,
+    schema: SetUserRoleSchema,
     isAdminAction: true,
     authorize: true,
   });
@@ -47,15 +74,26 @@ export async function updateUserRole(
     return handleError(validationResult) as ErrorResponse;
   }
 
-  try {
-    const updatedRole = role === "user" ? "business" : "user";
-    await User.findByIdAndUpdate(userID, {
-      role: updatedRole,
-    });
+  const { userID, role } = validationResult.params!;
 
-    return {
-      success: true,
-    };
+  try {
+    if (userID === validationResult.session?.user.id) {
+      throw new ForbiddenError("You cannot change your own role.");
+    }
+
+    const updated = await User.findOneAndUpdate(
+      { _id: userID, role: { $ne: "admin" } },
+      { role },
+      { new: true }
+    ).lean<{ role: string }>();
+
+    if (!updated) {
+      const exists = await User.exists({ _id: userID });
+      if (!exists) throw new NotFoundError("User");
+      throw new ForbiddenError("Admin accounts cannot be changed here.");
+    }
+
+    return { success: true, data: { role: updated.role } };
   } catch (error) {
     return handleError(error) as ErrorResponse;
   }
