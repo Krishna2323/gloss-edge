@@ -73,7 +73,9 @@ Migration (tested on the local copy first, fresh backup before running on prod):
       bottom nav by role, account sheet
 - [x] Products screen: search, city picker, low and out filters, per-city bars, pagination.
       Checked at phone and desktop width, admin and business roles
-- [ ] Product detail screen (rows link to `/products/[id]`, still a stub)
+- [x] Product detail screen: stock per city, movement history, Stock in, Out and Move sheets.
+      Tested end to end in a browser on the local copy, for admin, staff and business
+- [ ] Cities screen (add, rename, deactivate). Move needs two cities, and only Gorakhpur exists
 - Stock adjust sheet (in, out, transfer) with remark
 - Product detail page with per-city stock and movement history
 - Dashboard: stock by city, out-of-stock and low-stock lists, recent movements

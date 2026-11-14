@@ -10,7 +10,8 @@ import {
   TransferStockSchema,
 } from "../validations";
 import { applyStockChange, moveStockBetweenCities } from "../stock";
-import { canSeeCityStock, escapeRegex } from "../utils";
+import { canSeeCityStock, escapeRegex, isAdmin } from "../utils";
+import { NotFoundError } from "../http-errors";
 import Location from "@/database/models/location.model";
 import Product from "@/database/models/product.model";
 import StockLevel from "@/database/models/stock-level.model";
@@ -285,17 +286,56 @@ export async function getLocations(): Promise<
   }
 }
 
-export async function getProductStock(params: GetProductParams): Promise<
-  ActionResponse<{
-    levels: { location: { _id: string; name: string }; quantity: number }[];
-    movements: unknown[];
-  }>
-> {
+export type ProductMovement = {
+  _id: string;
+  type: "opening" | "in" | "out" | "transfer" | "correction";
+  city?: string;
+  from?: string;
+  to?: string;
+  change: number;
+  reason?: string;
+  note?: string;
+  user?: string;
+  at: string;
+};
+
+export type ProductDetail = {
+  product: {
+    _id: string;
+    code: string;
+    title: string;
+    brand: string;
+    description: string;
+    color?: string;
+    categories: string[];
+  };
+  total: number;
+  threshold: number;
+  status: StockStatus;
+  cities?: { _id: string; name: string; qty: number }[];
+  movements?: ProductMovement[];
+  canEdit: boolean;
+};
+
+type MovementDoc = {
+  _id: mongoose.Types.ObjectId;
+  type: ProductMovement["type"];
+  change: number;
+  reason?: string;
+  note?: string;
+  transferId?: mongoose.Types.ObjectId;
+  location?: { name: string };
+  user?: { name: string };
+  createdAt: Date;
+};
+
+export async function getProductDetail(
+  params: GetProductParams
+): Promise<ActionResponse<ProductDetail>> {
   const validationResult = await action({
     params,
     schema: GetProductSchema,
     authorize: true,
-    isAdminAction: true,
   });
 
   if (validationResult instanceof Error) {
@@ -303,27 +343,110 @@ export async function getProductStock(params: GetProductParams): Promise<
   }
 
   const { productID } = validationResult.params!;
+  const role = validationResult.session?.user.role;
+  const showCities = canSeeCityStock(role);
 
   try {
-    const levels = await StockLevel.find({ product: productID })
-      .populate("location", "name state")
-      .sort({ quantity: -1 })
-      .lean();
+    const product = await Product.findById(productID)
+      .populate("categories", "name")
+      .lean<{
+        _id: mongoose.Types.ObjectId;
+        code: string;
+        title: string;
+        brand: string;
+        description: string;
+        color?: string;
+        lowStockAt?: number;
+        categories: { name: string }[];
+      }>();
+    if (!product) throw new NotFoundError("Product");
 
-    const movements = await StockMovement.find({ product: productID })
-      .populate("location", "name")
-      .populate("user", "name")
-      .sort({ createdAt: -1 })
-      .limit(20)
-      .lean();
+    const levels = await StockLevel.find({ product: productID }).lean<
+      { location: mongoose.Types.ObjectId; quantity: number }[]
+    >();
+    const total = levels.reduce((sum, l) => sum + l.quantity, 0);
+    const threshold = product.lowStockAt ?? LOW_STOCK_DEFAULT;
+    const status: StockStatus =
+      total === 0 ? "out" : total < threshold ? "low" : "ok";
 
-    return {
-      success: true,
-      data: JSON.parse(JSON.stringify({ levels, movements })),
+    const detail: ProductDetail = {
+      product: {
+        _id: product._id.toString(),
+        code: product.code,
+        title: product.title,
+        brand: product.brand,
+        description: product.description,
+        color: product.color,
+        categories: product.categories.map((c) => c.name),
+      },
+      total,
+      threshold,
+      status,
+      canEdit: isAdmin(role),
     };
+
+    if (showCities) {
+      const locations = await Location.find({ active: true }).lean<
+        { _id: mongoose.Types.ObjectId; name: string }[]
+      >();
+      const byCity = new Map(
+        levels.map((l) => [l.location.toString(), l.quantity])
+      );
+      detail.cities = locations
+        .map((l) => ({
+          _id: l._id.toString(),
+          name: l.name,
+          qty: byCity.get(l._id.toString()) ?? 0,
+        }))
+        .sort((a, b) => b.qty - a.qty || a.name.localeCompare(b.name));
+
+      const docs = await StockMovement.find({ product: productID })
+        .populate("location", "name")
+        .populate("user", "name")
+        .sort({ createdAt: -1, _id: -1 })
+        .limit(40)
+        .lean<MovementDoc[]>();
+      detail.movements = groupTransfers(docs).slice(0, 15);
+    }
+
+    return { success: true, data: JSON.parse(JSON.stringify(detail)) };
   } catch (error) {
     return handleError(error) as ErrorResponse;
   }
+}
+
+function groupTransfers(docs: MovementDoc[]): ProductMovement[] {
+  const result: ProductMovement[] = [];
+  const transfers = new Map<string, ProductMovement>();
+
+  for (const doc of docs) {
+    const base = {
+      _id: doc._id.toString(),
+      type: doc.type,
+      change: doc.change,
+      reason: doc.reason,
+      note: doc.note,
+      user: doc.user?.name,
+      at: new Date(doc.createdAt).toISOString(),
+    };
+
+    if (doc.type !== "transfer" || !doc.transferId) {
+      result.push({ ...base, city: doc.location?.name });
+      continue;
+    }
+
+    const key = doc.transferId.toString();
+    let row = transfers.get(key);
+    if (!row) {
+      row = { ...base, change: Math.abs(doc.change) };
+      transfers.set(key, row);
+      result.push(row);
+    }
+    if (doc.change < 0) row.from = doc.location?.name;
+    else row.to = doc.location?.name;
+  }
+
+  return result;
 }
 
 export async function adjustStock(
