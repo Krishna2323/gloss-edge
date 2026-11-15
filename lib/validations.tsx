@@ -174,14 +174,6 @@ export const GetProductSchema = z.object({
   productID: z.string().min(1, { message: "product ID is required." }),
 });
 
-export const PaginatedSearchParamsSchema = z.object({
-  page: z.number().int().positive().default(1),
-  pageSize: z.number().int().positive().default(50),
-  query: z.string().optional(),
-  filter: z.string().optional(),
-  sort: z.string().optional(),
-});
-
 export const AdjustStockSchema = z
   .object({
     productID: z.string().min(1, { message: "Product is required." }),

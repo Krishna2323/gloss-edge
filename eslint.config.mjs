@@ -21,7 +21,7 @@ const config = [
       "plugin:tailwindcss/recommended",
       "prettier",
     ],
-    ignorePatterns: ["node_modules/"],
+    ignorePatterns: ["node_modules/", ".next/", "next-env.d.ts"],
     rules: {
       "no-undef": "off",
     },

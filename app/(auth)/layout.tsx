@@ -13,12 +13,12 @@ const AuthLayout = ({ children }: { children: ReactNode }) => {
               Welcome to GlossEdge!
             </h1>
             <p className="paragraph-regular text-dark500_light400">
-              To get your questions answered
+              Sign in to see the stock.
             </p>
           </div>
           <Image
             src="/images/site-logo.png"
-            alt="DevFlow Logo"
+            alt="GlossEdge logo"
             width={72}
             height={72}
             className="object-contain"

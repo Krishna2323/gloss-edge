@@ -94,12 +94,14 @@ Migration (tested on the local copy first, fresh backup before running on prod):
 
 ## Deferred cleanup (do last)
 
-- [ ] Drop `categoryproducts` (never read, 220 links missing, 5 dead rows)
-- [ ] Replace `categories.products` counter with a live count (Acrylic and Louvers are wrong)
-- [ ] Delete 3 accounts whose user no longer exists
-- [ ] Fix ESLint config so `next lint` works (flat config vs ESLint 8)
-- [ ] Remove devflow leftovers (`techMap.ts`, devicon helpers, `ASK_QUESTION`, upvote sort, `question` prop)
-- [ ] Bugs: `isBusinessAccount` checks admin, "Showing N of M" count, unescaped regex in
-      the old `getProducts` search,
-      `ref: "Profuct"` typo
+- [x] Stop writing `categoryproducts` and the `categories.products` counter. The product form
+      counts categories live from products (Acrylic and Louvers counters were wrong)
+- [x] `npm run lint` runs ESLint directly (`next lint` is deprecated and broke on the flat config)
+- [x] Removed devflow leftovers: `techMap.ts`, devicon helpers, `ASK_QUESTION`, upvote sort,
+      old cards, sidebar and navbar, the old admin layout, empty orders and profile pages
+- [x] Dead bugs removed with their code: `isBusinessAccount`, the old `getProducts` search,
+      "Showing N of M", `ref: "Profuct"`
+- [ ] Production data, needs a fresh backup and approval: drop `categoryproducts`, unset
+      `categories.products`, delete 3 accounts whose user no longer exists
 - [ ] Remove `NEXT_PUBLIC_API_BASE_URL` from Vercel
+- [ ] Sign in and sign up screens still use the old design

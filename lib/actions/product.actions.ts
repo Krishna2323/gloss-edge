@@ -1,16 +1,14 @@
 "use server";
 
-import mongoose, { FilterQuery } from "mongoose";
+import mongoose from "mongoose";
 import action from "../handlers/action";
 import handleError from "../handlers/error";
 import {
   CreateProductSchema,
   EditProductSchema,
   GetProductSchema,
-  PaginatedSearchParamsSchema,
 } from "../validations";
 import Product, { IProductDoc } from "@/database/models/product.model";
-import CategoryProduct from "@/database/models/category-product.model";
 import Category, { ICategoryDoc } from "@/database/models/category.model";
 import ProductHistory, {
   ProductChanges,
@@ -19,11 +17,10 @@ import Location from "@/database/models/location.model";
 import StockLevel from "@/database/models/stock-level.model";
 import { ForbiddenError, NotFoundError } from "../http-errors";
 import { applyStockChange } from "../stock";
-import { escapeRegex, isAdmin as isAdminUtil } from "../utils";
+import { escapeRegex } from "../utils";
 import {
   ActionResponse,
   ErrorResponse,
-  PaginatedSearchParams,
   Product as ProductInterface,
 } from "@/types/global";
 
@@ -80,21 +77,15 @@ export async function createProduct(
         { session }
       );
 
-      const categoryProductDocuments = [];
       for (const category of uniqueNames(categories)) {
         const existingCategory = await Category.findOneAndUpdate(
           { name: new RegExp(`^${escapeRegex(category)}$`, "i") },
-          { $setOnInsert: { name: category }, $inc: { products: 1 } },
+          { $setOnInsert: { name: category } },
           { upsert: true, new: true, session }
         );
         product.categories.push(existingCategory._id);
-        categoryProductDocuments.push({
-          category: existingCategory._id,
-          product: product._id,
-        });
       }
 
-      await CategoryProduct.insertMany(categoryProductDocuments, { session });
       await product.save({ session });
 
       if (startingStock > 0 && locationID) {
@@ -192,22 +183,18 @@ export async function editProduct(
         !categories.some((c) => c.toLowerCase() === category.name.toLowerCase())
     );
 
-    const newCategoryDocuments = [];
+    const addedCategoryIds: mongoose.Types.ObjectId[] = [];
 
     if (categoriesToAdd.length > 0) {
       for (const category of categoriesToAdd) {
         const existingCategory = await Category.findOneAndUpdate(
           { name: new RegExp(`^${escapeRegex(category)}$`, "i") },
-          { $setOnInsert: { name: category }, $inc: { products: 1 } },
+          { $setOnInsert: { name: category } },
           { upsert: true, new: true, session }
         );
 
         if (existingCategory) {
-          newCategoryDocuments.push({
-            category: existingCategory._id,
-            product: productID,
-          });
-
+          addedCategoryIds.push(existingCategory._id);
           product.categories.push(existingCategory._id);
         }
       }
@@ -216,17 +203,6 @@ export async function editProduct(
     if (categoriesToRemove.length > 0) {
       const categoryIdsToRemove = categoriesToRemove.map(
         (category: ICategoryDoc) => category._id
-      );
-
-      await Category.updateMany(
-        { _id: { $in: categoryIdsToRemove } },
-        { $inc: { products: -1 } },
-        { session }
-      );
-
-      await CategoryProduct.deleteMany(
-        { category: { $in: categoryIdsToRemove }, product: productID },
-        { session }
       );
 
       product.categories = product.categories.filter(
@@ -250,7 +226,7 @@ export async function editProduct(
             product: productID,
             editor: userId,
             changes,
-            categoriesAdded: newCategoryDocuments.map((c) => c.category),
+            categoriesAdded: addedCategoryIds,
             categoriesRemoved: categoriesToRemove.map(
               (c: ICategoryDoc) => c._id
             ),
@@ -259,10 +235,6 @@ export async function editProduct(
         ],
         { session }
       );
-    }
-
-    if (newCategoryDocuments.length > 0) {
-      await CategoryProduct.insertMany(newCategoryDocuments, { session });
     }
 
     await product.save({ session });
@@ -300,90 +272,6 @@ export async function getProduct(
     }
 
     return { success: true, data: JSON.parse(JSON.stringify(product)) };
-  } catch (error) {
-    return handleError(error) as ErrorResponse;
-  }
-}
-
-export async function getProducts(params: PaginatedSearchParams): Promise<
-  ActionResponse<{
-    products: ProductInterface[];
-    isNext: boolean;
-    totalProducts: number;
-  }>
-> {
-  const validationResult = await action({
-    params,
-    schema: PaginatedSearchParamsSchema,
-    isAdminAction: false,
-    authorize: true,
-  });
-
-  if (validationResult instanceof Error) {
-    return handleError(validationResult) as ErrorResponse;
-  }
-
-  const { page = 1, pageSize = 10, query, filter } = params;
-  const skip = (Number(page) - 1) * pageSize;
-  const limit = Number(pageSize);
-  const filterQuery: FilterQuery<typeof Product> = {};
-
-  if (filter === "recommended") {
-    return {
-      success: true,
-      data: { products: [], isNext: false, totalProducts: 0 },
-    };
-  }
-
-  if (query) {
-    filterQuery.$or = [
-      { title: { $regex: new RegExp(query, "i") } },
-      { brand: { $regex: new RegExp(query, "i") } },
-      { description: { $regex: new RegExp(query, "i") } },
-      { code: { $regex: new RegExp(query, "i") } },
-    ];
-  }
-
-  const isAdmin = isAdminUtil(validationResult.session?.user.role);
-
-  let sortCriteria: Record<string, 1 | -1> = {
-    ...(isAdmin ? { stock: 1 } : {}),
-  };
-  switch (filter) {
-    case "newest":
-      sortCriteria = { ...sortCriteria, createdAt: -1 };
-      break;
-    // case "unanswered":
-    //   filterQuery.answers = 0;
-    //   sortCriteria = { createdAt: -1 };
-    //   break;
-    case "popular":
-      sortCriteria = { ...sortCriteria, upvotes: -1 };
-      break;
-    default:
-      sortCriteria = { ...sortCriteria, createdAt: -1 };
-      break;
-  }
-
-  try {
-    const totalProducts = await Product.countDocuments(filterQuery);
-    const products = await Product.find(filterQuery)
-      .populate("categories", "name")
-      // .populate("author", "name image")
-      .lean()
-      .sort(sortCriteria)
-      .skip(skip)
-      .limit(limit);
-    const isNext = totalProducts > skip + products.length;
-
-    return {
-      success: true,
-      data: {
-        products: JSON.parse(JSON.stringify(products)),
-        isNext,
-        totalProducts,
-      },
-    };
   } catch (error) {
     return handleError(error) as ErrorResponse;
   }
@@ -449,28 +337,10 @@ export async function deleteProduct(params: {
         (id) => new mongoose.Types.ObjectId(id)
       );
 
-      // 1) Remove category-product join rows first
-      if (categoryIds.length > 0) {
-        await CategoryProduct.deleteMany(
-          { product: productID, category: { $in: categoryIds } },
-          { session }
-        );
-      }
-
-      // 2) Decrement category counters (simple $inc; assumes consistency)
-      if (categoryIds.length > 0) {
-        await Category.updateMany(
-          { _id: { $in: categoryIds } },
-          { $inc: { products: -1 } },
-          { session }
-        );
-        // If you want to guard against negatives, swap the above with a pipeline update.
-      }
-
-      // 3) Delete the product itself
+      // Delete the product itself
       await Product.findByIdAndDelete(productID, { session });
 
-      // 4) Log in history with snapshot fields for UI after deletion
+      // Log in history with snapshot fields for UI after deletion
       await ProductHistory.create(
         [
           {
@@ -517,9 +387,21 @@ export async function getProductFormOptions(): Promise<
   try {
     const [brands, categories, cities] = await Promise.all([
       Product.distinct("brand") as Promise<string[]>,
-      Category.find({ products: { $gt: 0 } })
-        .sort({ products: -1 })
-        .lean<{ name: string }[]>(),
+      Product.aggregate<{ name: string }>([
+        { $unwind: "$categories" },
+        { $group: { _id: "$categories", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        {
+          $lookup: {
+            from: "categories",
+            localField: "_id",
+            foreignField: "_id",
+            as: "category",
+          },
+        },
+        { $unwind: "$category" },
+        { $project: { _id: 0, name: "$category.name" } },
+      ]),
       Location.find({ active: true })
         .sort({ name: 1 })
         .lean<{ _id: mongoose.Types.ObjectId; name: string }[]>(),
