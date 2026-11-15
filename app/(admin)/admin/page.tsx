@@ -1,7 +1,5 @@
-import React from "react";
+import { redirect } from "next/navigation";
 
-const page = () => {
-  return <div>Admin Dashboard</div>;
-};
+const page = () => redirect("/");
 
 export default page;
