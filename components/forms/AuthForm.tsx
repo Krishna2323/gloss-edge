@@ -1,141 +1,174 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import {
-  DefaultValues,
-  FieldValues,
-  Path,
-  SubmitHandler,
-  useForm,
-} from "react-hook-form";
-import { z, ZodType } from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "../ui/button";
-import { useToast } from "@/hooks/useToast";
 import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
+import { ZodType } from "zod";
+import { fieldClass, Label } from "@/components/stock/fields";
+import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
+import { cn } from "@/lib/utils";
 import { ActionResponse } from "@/types/global";
 
-interface AuthFormProps<T extends FieldValues> {
+type Values = Record<string, string>;
+
+interface AuthFormProps<T extends Values> {
   schema: ZodType<T>;
   defaultValues: T;
-  onSubmit: (data: T) => Promise<{ success: boolean }>;
+  onSubmit: (data: T) => Promise<ActionResponse>;
   formType: "SIGN_IN" | "SIGN_UP";
 }
 
-const AuthForm = <T extends FieldValues>({
+const FIELDS: Record<
+  string,
+  { label: string; type: string; autoComplete: string; placeholder: string }
+> = {
+  name: {
+    label: "Full name",
+    type: "text",
+    autoComplete: "name",
+    placeholder: "Your name",
+  },
+  username: {
+    label: "Username",
+    type: "text",
+    autoComplete: "username",
+    placeholder: "Letters, numbers and _",
+  },
+  email: {
+    label: "Email",
+    type: "email",
+    autoComplete: "email",
+    placeholder: "you@example.com",
+  },
+  password: {
+    label: "Password",
+    type: "password",
+    autoComplete: "current-password",
+    placeholder: "At least 6 characters",
+  },
+};
+
+const AuthForm = <T extends Values>({
   schema,
   defaultValues,
   formType,
   onSubmit,
 }: AuthFormProps<T>) => {
-  const { toast } = useToast();
   const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [values, setValues] = useState<Values>(defaultValues);
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+  const isSignIn = formType === "SIGN_IN";
 
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
-    defaultValues: defaultValues as DefaultValues<T>,
-  });
-
-  const handleSubmit: SubmitHandler<T> = async (data) => {
-    const result = (await onSubmit(data)) as ActionResponse;
-
-    if (result?.success) {
-      toast({
-        title: "Success",
-        description:
-          formType === "SIGN_IN"
-            ? "Signed in successfully"
-            : "Signed up successfully",
-      });
-
-      router.push(ROUTES.HOME);
-    } else {
-      toast({
-        title: `Error ${result?.status}`,
-        description: result?.error?.message,
-        type: "error",
-      });
+  const submit = () => {
+    const parsed = schema.safeParse(values);
+    if (!parsed.success) {
+      const fieldErrors = parsed.error.flatten().fieldErrors as Record<
+        string,
+        string[] | undefined
+      >;
+      setErrors(
+        Object.fromEntries(
+          Object.entries(fieldErrors).map(([k, v]) => [k, v?.[0]])
+        )
+      );
+      return;
     }
+    setErrors({});
+
+    startTransition(async () => {
+      const result = await onSubmit(parsed.data);
+      if (!result?.success) {
+        toast.error(
+          result?.error?.message ??
+            (isSignIn ? "Could not sign in." : "Could not create the account.")
+        );
+        return;
+      }
+      router.push(ROUTES.HOME);
+      router.refresh();
+    });
   };
 
-  const buttonText = formType === "SIGN_IN" ? "Sign In" : "Sign Up";
-
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleSubmit)}
-        className="mt-10 space-y-6"
-      >
-        {Object.keys(defaultValues).map((field) => (
-          <FormField
-            key={field}
-            control={form.control}
-            name={field as Path<T>}
-            render={({ field }) => (
-              <FormItem className="flex w-full flex-col gap-2.5">
-                <FormLabel className="paragraph-medium text-dark400_light700">
-                  {field.name === "email"
-                    ? "Email Address"
-                    : field.name.charAt(0).toUpperCase() + field.name.slice(1)}
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    required
-                    type={field.name === "password" ? "password" : "text"}
-                    {...field}
-                    className="paragraph-regular background-light900_dark300 light-border-2 text-dark300_light700 no-focus min-h-12 rounded-1.5 border"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+    <form
+      noValidate
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
+      }}
+      className="mt-12 flex flex-col gap-5"
+    >
+      <h1 className="font-wide text-[34px] font-black uppercase leading-none tracking-tight">
+        {isSignIn ? "Sign in" : "Create account"}
+      </h1>
+      <p className="-mt-1 text-sm text-fg-muted">
+        {isSignIn
+          ? "Sign in to see the stock."
+          : "The admin gives your account access after you sign up."}
+      </p>
+
+      {Object.keys(defaultValues).map((key) => {
+        const field = FIELDS[key];
+        return (
+          <div key={key} className="flex flex-col gap-2">
+            <Label htmlFor={key}>{field.label}</Label>
+            <input
+              id={key}
+              name={key}
+              type={field.type}
+              autoComplete={
+                key === "password" && !isSignIn
+                  ? "new-password"
+                  : field.autoComplete
+              }
+              autoCapitalize={key === "name" ? "words" : "none"}
+              placeholder={field.placeholder}
+              value={values[key]}
+              aria-invalid={!!errors[key]}
+              onChange={(e) => {
+                setValues((v) => ({ ...v, [key]: e.target.value }));
+                setErrors((er) => ({ ...er, [key]: undefined }));
+              }}
+              className={cn(fieldClass, "placeholder:text-fg-faint")}
+            />
+            {errors[key] && (
+              <p role="alert" className="text-xs font-semibold text-out">
+                {errors[key]}
+              </p>
             )}
-          />
-        ))}
+          </div>
+        );
+      })}
 
-        <Button
-          disabled={form.formState.isSubmitting}
-          className="primary-gradient paragraph-medium min-h-12 w-full rounded-2 px-4 py-3 font-inter !text-light-900"
+      <Button
+        type="submit"
+        variant="gold"
+        size="tap"
+        disabled={pending}
+        className="mt-2"
+      >
+        {pending
+          ? isSignIn
+            ? "Signing in..."
+            : "Creating account..."
+          : isSignIn
+            ? "Sign in"
+            : "Create account"}
+      </Button>
+
+      <p className="text-center text-sm text-fg-muted">
+        {isSignIn ? "New here? " : "Already have an account? "}
+        <Link
+          href={isSignIn ? ROUTES.SIGN_UP : ROUTES.SIGN_IN}
+          className="font-bold text-gold"
         >
-          {form.formState.isSubmitting
-            ? buttonText === "Sign In"
-              ? "Signin In..."
-              : "Signing Up..."
-            : buttonText}
-        </Button>
-
-        {formType === "SIGN_IN" ? (
-          <p>
-            Don&apos;t have an account?{" "}
-            <Link
-              href={ROUTES.SIGN_UP}
-              className="paragraph-semibold primary-text-gradient"
-            >
-              Sign up
-            </Link>
-          </p>
-        ) : (
-          <p>
-            Already have an account?{" "}
-            <Link
-              href={ROUTES.SIGN_IN}
-              className="paragraph-semibold primary-text-gradient"
-            >
-              Sign in
-            </Link>
-          </p>
-        )}
-      </form>
-    </Form>
+          {isSignIn ? "Create account" : "Sign in"}
+        </Link>
+      </p>
+    </form>
   );
 };
 

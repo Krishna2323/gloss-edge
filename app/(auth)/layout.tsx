@@ -5,28 +5,30 @@ import SocialAuthForm from "@/components/forms/SocialAuthForm";
 
 const AuthLayout = ({ children }: { children: ReactNode }) => {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-auth bg-cover bg-center bg-no-repeat px-4 py-10">
-      <section className="light-border background-light800_dark200 shadow-light100_dark100 min-w-full rounded-[10px] border px-4 py-10 shadow-md sm:min-w-[520px] sm:px-8">
-        <div className="flex items-center justify-between gap-2">
-          <div className="space-y-2.5">
-            <h1 className="h2-bold text-dark100_light900">
-              Welcome to GlossEdge!
-            </h1>
-            <p className="paragraph-regular text-dark500_light400">
-              Sign in to see the stock.
-            </p>
-          </div>
+    <main className="relative min-h-screen overflow-x-hidden bg-ink-950 font-archivo text-fg">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-20 -top-44 h-[360px] w-[420px] bg-[radial-gradient(ellipse_at_center,rgba(245,196,81,0.13),rgba(245,196,81,0)_65%)]"
+      />
+      <div className="relative mx-auto flex w-full max-w-md flex-col px-5 pb-12 pt-14">
+        <div className="flex items-center gap-3.5">
           <Image
             src="/images/site-logo.png"
             alt="GlossEdge logo"
-            width={72}
-            height={72}
-            className="object-contain"
+            width={48}
+            height={48}
+            className="size-12 rounded-[14px] object-contain"
           />
+          <div className="flex flex-col gap-1">
+            <span className="font-wide text-lg font-black uppercase leading-none tracking-tight">
+              Gloss Edge
+            </span>
+            <span className="text-xs text-fg-muted">Stock across cities</span>
+          </div>
         </div>
         {children}
         <SocialAuthForm />
-      </section>
+      </div>
     </main>
   );
 };

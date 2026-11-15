@@ -101,7 +101,7 @@ Migration (tested on the local copy first, fresh backup before running on prod):
       old cards, sidebar and navbar, the old admin layout, empty orders and profile pages
 - [x] Dead bugs removed with their code: `isBusinessAccount`, the old `getProducts` search,
       "Showing N of M", `ref: "Profuct"`
-- [ ] Production data, needs a fresh backup and approval: drop `categoryproducts`, unset
-      `categories.products`, delete 3 accounts whose user no longer exists
+- [x] Production data (backup `devflow-2026-11-15-precleanup.archive.gz`): dropped
+      `categoryproducts`, unset `categories.products`, deleted 3 accounts whose user no longer existed
 - [ ] Remove `NEXT_PUBLIC_API_BASE_URL` from Vercel
-- [ ] Sign in and sign up screens still use the old design
+- [x] Sign in and sign up in the new design. Errors show as toasts again (the old toast hook had no container)

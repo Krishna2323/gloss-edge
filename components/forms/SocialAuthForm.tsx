@@ -2,57 +2,39 @@
 
 import Image from "next/image";
 import { signIn } from "next-auth/react";
-import React from "react";
-import { toast } from "@/hooks/useToast";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { ROUTES } from "@/constants/routes";
 
 const SocialAuthForm = () => {
-  const buttonClass =
-    "background-dark400_light900 body-medium text-dark200_light800 min-h-12 flex-1 rounded-2 px-4 py-3.5";
-
-  const handleSignIn = async (provider: "google") => {
+  const handleSignIn = async () => {
     try {
-      await signIn(provider, {
-        callbackUrl: ROUTES.HOME,
-        redirect: false,
-      });
+      await signIn("google", { callbackUrl: ROUTES.HOME, redirect: false });
     } catch (error) {
-      console.log(error);
-
-      toast({
-        title: "Sign-in Failed",
-        description:
-          error instanceof Error
-            ? error.message
-            : "An error occured during sign-in",
-        // variant: "destructive",
-      });
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Could not sign in with Google."
+      );
     }
   };
 
   return (
-    <div className="mt-10 flex flex-wrap gap-2.5">
-      {/* <Button className={buttonClass} onClick={() => handleSignIn("github")}>
-        <Image
-          src="/icons/github.svg"
-          alt="Github Logo"
-          width={20}
-          height={20}
-          className="invert-colors mr-2.5 object-contain"
-        />
-        <span>Log in with GitHub</span>
-      </Button> */}
-
-      <Button className={buttonClass} onClick={() => handleSignIn("google")}>
+    <div className="mt-8 flex flex-col gap-5">
+      <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.08em] text-fg-faint">
+        <span className="h-px flex-1 bg-white/[0.08]" />
+        OR
+        <span className="h-px flex-1 bg-white/[0.08]" />
+      </div>
+      <Button type="button" variant="raised" size="tap" onClick={handleSignIn}>
         <Image
           src="/icons/google.svg"
-          alt="Google Logo"
+          alt=""
           width={20}
           height={20}
-          className="mr-2.5 object-contain"
+          className="object-contain"
         />
-        <span>Log in with Google</span>
+        Continue with Google
       </Button>
     </div>
   );
